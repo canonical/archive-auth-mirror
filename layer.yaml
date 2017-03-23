@@ -1,2 +1,6 @@
 includes:
   - 'layer:basic'
+repo: https://github.com/CanonicalLtd/ubuntu-esm-charm
+options:
+  basic:
+    use_venv: true
