@@ -1,0 +1,27 @@
+#!/usr/bin/python3
+
+import amulet
+import unittest
+
+
+class TestCharm(unittest.TestCase):
+    def setUp(self):
+        self.d = amulet.Deployment(series='xenial')
+
+        self.d.add('apache2')
+        self.d.add('ubuntu-esm')
+        self.d.relate('ubuntu-esm:static-website', 'apache2:apache-website')
+
+        self.d.setup(timeout=900)
+        self.d.sentry.wait()
+
+        self.unit = self.d.sentry['ubuntu-esm'][0]
+
+    def test_install(self):
+        '''That that the charm installs expected files.'''
+        page = self.unit.file_contents('/srv/ubuntu-esm/static/index.html')
+        self.assertIn('InUbuntu ESM', page)
+
+
+if __name__ == '__main__':
+    unittest.main()
