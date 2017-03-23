@@ -3,10 +3,10 @@ from pathlib import Path
 import textwrap
 
 from charms.reactive import (
-    when,
     when_not,
     set_state,
 )
+from charms.reactive.decorators import hook
 from charmhelpers.core import hookenv
 
 
@@ -21,9 +21,8 @@ def install():
     set_state('ubuntu-esm.installed')
 
 
-@when('static-website.available')
-def website_relation(something):
-    hookenv.log("XXXXXXXX>{}".format(something))
+@hook('static-website-relation-{joined,changed}')
+def website_relation():
     _config_website_relation()
 
 
@@ -40,9 +39,17 @@ def _config_website_relation(domain=None):
         domain = hookenv.unit_public_ip()
     vhost_config = textwrap.dedent(
         '''
-        DocumentRoot "/srv/ubuntu-esm/static>"
-        Options +Indexes
-        ''')
+        <VirtualHost {domain}:80>
+          DocumentRoot "{document_root}"
+          Options +Indexes
+
+          <Directory "{document_root}">
+            Require all granted
+          </Directory>
+        </VirtualHost>
+        '''.format(
+            domain=domain,
+            document_root=STATIC_DIR))
     config = {
         'domain': domain,
         'enabled': True,
@@ -51,5 +58,4 @@ def _config_website_relation(domain=None):
         'ports': '80'}
 
     for relation_id in hookenv.relation_ids('static-website'):
-        hookenv.log("XXXXXXXXXX {}".format(relation_id))
         hookenv.relation_set(relation_id, config)

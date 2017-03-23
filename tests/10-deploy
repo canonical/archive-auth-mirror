@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
-import amulet
 import unittest
+
+import requests
+
+import amulet
 
 
 class TestCharm(unittest.TestCase):
@@ -21,6 +24,12 @@ class TestCharm(unittest.TestCase):
         '''That that the charm installs expected files.'''
         page = self.unit.file_contents('/srv/ubuntu-esm/static/index.html')
         self.assertIn('Ubuntu ESM', page)
+
+    def test_website_relation(self):
+        '''The apache-website configures the virtualhost for the static dir.'''
+        url = 'http://{}'.format(self.unit.info['public-address'])
+        page = requests.get(url)
+        self.assertIn('Ubuntu ESM', page.text)
 
 
 if __name__ == '__main__':
