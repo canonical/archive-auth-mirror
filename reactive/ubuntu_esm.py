@@ -9,7 +9,7 @@ STATIC_DIR = BASE_DIR + '/static'
 
 
 @when_not('ubuntu-esm.installed')
-def install_ubuntu_esm():
+def install():
     _ensure_tree()
     set_state('ubuntu-esm.installed')
 
