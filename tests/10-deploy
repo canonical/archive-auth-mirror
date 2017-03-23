@@ -20,7 +20,7 @@ class TestCharm(unittest.TestCase):
     def test_install(self):
         '''That that the charm installs expected files.'''
         page = self.unit.file_contents('/srv/ubuntu-esm/static/index.html')
-        self.assertIn('InUbuntu ESM', page)
+        self.assertIn('Ubuntu ESM', page)
 
 
 if __name__ == '__main__':
