@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo add-apt-repository -yu ppa:juju/stable
+sudo apt install -y amulet python-requests

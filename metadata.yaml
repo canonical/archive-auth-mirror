@@ -4,6 +4,12 @@ maintainer: Canonical Landscape Team <landscape-crew@lists.canonical.com>
 description: |
   This subordinate charm provides an HTTPS mirror of the Ubuntu ESM archive,
   and authorization.
+series:
+  - xenial
 tags:
   - security
 subordinate: true
+requires:
+  static-website:
+    interface: apache-website
+    scope: container
