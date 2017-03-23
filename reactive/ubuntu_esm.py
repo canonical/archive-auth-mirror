@@ -43,9 +43,10 @@ def _config_website_relation(domain=None):
           DocumentRoot "{document_root}"
           Options +Indexes
 
-          <Directory "{document_root}">
+          <Location />
             Require all granted
-          </Directory>
+            Options +Indexes
+          </Location>
         </VirtualHost>
         '''.format(
             domain=domain,
