@@ -1,0 +1,9 @@
+name: ubuntu-esm
+summary: Ubuntu ESM (Extended Security Maintenance)
+maintainer: Canonical Landscape Team <landscape-crew@lists.canonical.com>
+description: |
+  This subordinate charm provides an HTTPS mirror of the Ubuntu ESM archive,
+  and authorization.
+tags:
+  - security
+subordinate: true

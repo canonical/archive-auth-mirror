@@ -1,0 +1,13 @@
+options:
+  mirror-uri:
+    type: string
+    description: "ESM repository to mirror."
+    default: ""
+  mirror-gpg-key:
+    type: string
+    description: "GPG key for the repository to mirror."
+    default: ""
+  sign-gpg-key:
+    type: string
+    description: "GPG key for signing the archive."
+    default: ""
