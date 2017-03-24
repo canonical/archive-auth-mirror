@@ -46,7 +46,6 @@ class GetWebsiteRelationConfigTest(unittest.TestCase):
         expected_site_config = textwrap.dedent('''
         <VirtualHost host.example.com:80>
           DocumentRoot "/srv/ubuntu-esm/static"
-          Options +Indexes
 
           <Location />
             Require all granted

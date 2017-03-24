@@ -3,6 +3,7 @@ from pathlib import Path
 import textwrap
 
 from charms.reactive import (
+    when,
     when_not,
     set_state,
 )
@@ -16,10 +17,27 @@ def install():
     set_state('ubuntu-esm.installed')
 
 
+@when('config.changed.service-url')
+def config_service_url():
+    config = hookenv.config()
+    _configure_website_relation(domain=config.get('service-url'))
+
+
 @hook('static-website-relation-{joined,changed}')
 def website_relation():
-    config = _get_website_relation_config(hookenv.unit_public_ip())
-    hookenv.relation_set(hookenv.relation_id(), config)
+    _configure_website_relation()
+
+
+def _configure_website_relation(domain=None):
+    '''Configure the 'static-website' relation.'''
+    if not domain:
+        domain = hookenv.unit_public_ip()
+    config = _get_website_relation_config(domain)
+    if hookenv.in_relation_hook():
+        hookenv.relation_set(hookenv.relation_id(), config)
+    else:
+        for relation_id in hookenv.relation_ids('static-website'):
+            hookenv.relation_set(relation_id, config)
 
 
 def _get_paths(base_dir=None):
@@ -60,7 +78,6 @@ def _get_website_relation_config(domain):
         '''
         <VirtualHost {domain}:80>
           DocumentRoot "{document_root}"
-          Options +Indexes
 
           <Location />
             Require all granted
