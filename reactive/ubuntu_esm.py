@@ -23,7 +23,8 @@ def install():
 
 @hook('static-website-relation-{joined,changed}')
 def website_relation():
-    _config_website_relation()
+    config = _get_website_relation_config(domain=hookenv.unit_public_ip())
+    hookenv.relation_set(hookenv.relation_id(), config)
 
 
 def _install_resources():
@@ -33,10 +34,8 @@ def _install_resources():
     shutil.copy('resources/index.html', str(STATIC_DIR))
 
 
-def _config_website_relation(domain=None):
-    '''Configure the 'static-website' relation.'''
-    if not domain:
-        domain = hookenv.unit_public_ip()
+def _get_website_relation_config(domain=None):
+    '''Return the configuration for the 'static-website' relation.'''
     vhost_config = textwrap.dedent(
         '''
         <VirtualHost {domain}:80>
@@ -51,12 +50,9 @@ def _config_website_relation(domain=None):
         '''.format(
             domain=domain,
             document_root=STATIC_DIR))
-    config = {
+    return {
         'domain': domain,
         'enabled': True,
         'site_config': vhost_config,
         'site_modules': ['autoindex'],
         'ports': '80'}
-
-    for relation_id in hookenv.relation_ids('static-website'):
-        hookenv.relation_set(relation_id, config)
