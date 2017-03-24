@@ -3,4 +3,6 @@ includes:
 repo: https://github.com/CanonicalLtd/ubuntu-esm-charm
 options:
   basic:
+    packages:
+      - gnupg
     use_venv: true

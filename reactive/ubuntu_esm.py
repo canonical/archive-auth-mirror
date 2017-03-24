@@ -1,6 +1,3 @@
-import shutil
-from pathlib import Path
-import textwrap
 
 from charms.reactive import (
     when,
@@ -9,87 +6,43 @@ from charms.reactive import (
 )
 from charms.reactive.decorators import hook
 from charmhelpers.core import hookenv
+from charmhelpers.fetch import apt_install
+
+from charms.ubuntu_esm.utils import (
+    configure_website_relation,
+    install_resources,
+)
+
+from charms.ubuntu_esm.gpg import import_gpg_keys
+
+
+PACKAGES = ['reprepro']
 
 
 @when_not('ubuntu-esm.installed')
 def install():
-    _install_resources()
+    apt_install(PACKAGES, fatal=True)
+    install_resources()
     set_state('ubuntu-esm.installed')
 
 
-@when('config.changed.service-url')
-def config_service_url():
+@when('config.changed')
+def config_changed():
     config = hookenv.config()
-    _configure_website_relation(domain=config.get('service-url'))
+    service_url = config.get('service-url')
+    mirror_uri = config.get('mirror-uri')
+    mirror_key = config.get('mirror-gpg-key')
+    sign_key = config.get('sign-gpg-key')
+
+    configure_website_relation(domain=service_url)
+    if mirror_uri and mirror_key and sign_key:
+        mirror_fprint, sign_fprint = import_gpg_keys(mirror_key, sign_key)
+        # XXX for now just log the imported keys
+        hookenv.log(
+            "import keys fingerprints {} {}".format(
+                mirror_fprint, sign_fprint))
 
 
 @hook('static-website-relation-{joined,changed}')
 def website_relation():
-    _configure_website_relation()
-
-
-def _configure_website_relation(domain=None):
-    '''Configure the 'static-website' relation.'''
-    if not domain:
-        domain = hookenv.unit_public_ip()
-    config = _get_website_relation_config(domain)
-    if hookenv.in_relation_hook():
-        hookenv.relation_set(hookenv.relation_id(), config)
-    else:
-        for relation_id in hookenv.relation_ids('static-website'):
-            hookenv.relation_set(relation_id, config)
-
-
-def _get_paths(base_dir=None):
-    '''Return path for the service tree.
-
-    The filesystem tree for the service is as follows:
-
-    /srv/ubuntu-esm
-    ├── bin
-    │   └── ubuntu-esm-mirror  -- the mirroring script
-    ├── reprepro
-    │   └── conf  -- reprepro configuration files
-    └── static  -- the root of the virtualhost, contains the repository
-    '''
-    if base_dir is None:
-        base_dir = '/srv/ubuntu-esm'
-    base_dir = Path(base_dir)
-    return {
-        'base': base_dir,
-        'bin': base_dir / 'bin',
-        'reprepro': base_dir / 'reprepro',
-        'static': base_dir / 'static'}
-
-
-def _install_resources(base_dir=None):
-    '''Create tree structure and copy resources from the charm.'''
-    paths = _get_paths(base_dir=base_dir)
-    for directory in paths.values():
-        directory.mkdir(parents=True, exist_ok=True)
-    shutil.copy('resources/index.html', str(paths['static']))
-    shutil.copy('resources/ubuntu-esm-mirror', str(paths['bin']))
-
-
-def _get_website_relation_config(domain):
-    '''Return the configuration for the 'static-website' relation.'''
-    paths = _get_paths()
-    vhost_config = textwrap.dedent(
-        '''
-        <VirtualHost {domain}:80>
-          DocumentRoot "{document_root}"
-
-          <Location />
-            Require all granted
-            Options +Indexes
-          </Location>
-        </VirtualHost>
-        '''.format(
-            domain=domain,
-            document_root=paths['static']))
-    return {
-        'domain': domain,
-        'enabled': True,
-        'site_config': vhost_config,
-        'site_modules': ['autoindex'],
-        'ports': '80'}
+    configure_website_relation()
