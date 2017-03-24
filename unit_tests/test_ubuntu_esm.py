@@ -1,7 +1,13 @@
-import os
 import textwrap
 import unittest
+
 from fixtures import TempDir
+
+from testtools.matchers import (
+    FileContains,
+    DirContains,
+    Contains,
+)
 
 from charmtest import CharmTest
 
@@ -12,22 +18,23 @@ class InstallResourcesTests(CharmTest):
 
     def setUp(self):
         super().setUp()
-        self.base_dir = self.useFixture(TempDir()).path
+        self.base_dir = self.useFixture(TempDir())
 
     def test_dirs(self):
         '''The _install_resources function creates the filesystem structure.'''
-        ubuntu_esm._install_resources(base_dir=self.base_dir)
-        self.assertItemsEqual(
-            ['bin', 'static', 'reprepro'],
-            os.listdir(self.base_dir))
+        ubuntu_esm._install_resources(base_dir=self.base_dir.path)
+        self.assertThat(
+            self.base_dir.path, DirContains(['bin', 'static', 'reprepro']))
 
     def test_resources(self):
         '''Resources from the charm are copied to the service tree.'''
-        ubuntu_esm._install_resources(base_dir=self.base_dir)
-        with open(os.path.join(self.base_dir, 'static/index.html')) as fd:
-            self.assertIn("Ubuntu ESM", fd.read())
-        with open(os.path.join(self.base_dir, 'bin/ubuntu-esm-mirror')) as fd:
-            self.assertIn("reprepro", fd.read())
+        ubuntu_esm._install_resources(base_dir=self.base_dir.path)
+        self.assertThat(
+            self.base_dir.join('static/index.html'),
+            FileContains(matcher=Contains("Ubuntu ESM")))
+        self.assertThat(
+            self.base_dir.join('bin/ubuntu-esm-mirror'),
+            FileContains(matcher=Contains("reprepro")))
 
 
 class GetWebsiteRelationConfigTest(unittest.TestCase):
