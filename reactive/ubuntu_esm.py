@@ -27,6 +27,6 @@ def install():
 def _install_resources():
     '''Create tree structure and copy resources from the charm.'''
     for directory in BASE_DIR, BIN_DIR, REPREPRO_CONF_DIR, STATIC_DIR:
-        directory.mkdir(exist_ok=True)
+        directory.mkdir(parents=True, exist_ok=True)
     shutil.copy('resources/index.html', str(STATIC_DIR))
     shutil.copy('resources/ubuntu-esm-mirror', str(BIN_DIR))
