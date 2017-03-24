@@ -1,4 +1,8 @@
 options:
+  service-url:
+    type: string
+    description: "The URL of the service."
+    default: ""
   mirror-uri:
     type: string
     description: "ESM repository to mirror."
