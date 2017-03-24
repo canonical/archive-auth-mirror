@@ -1,0 +1,5 @@
+flake8
+fixtures
+charmhelpers
+charms.reactive
+charm-test
