@@ -31,8 +31,8 @@ def _get_paths(base_dir=None):
     ├── bin
     │   └── ubuntu-esm-mirror  -- the mirroring script
     ├── reprepro
-    │   └── conf -- reprepro configuration files
-    └── static   -- the root of the virtualhost, contains the repository
+    │   └── conf  -- reprepro configuration files
+    └── static  -- the root of the virtualhost, contains the repository
     '''
     if base_dir is None:
         base_dir = '/srv/ubuntu-esm'
