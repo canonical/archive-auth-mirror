@@ -24,6 +24,9 @@ class TestCharm(unittest.TestCase):
         '''That that the charm installs expected files.'''
         page = self.unit.file_contents('/srv/ubuntu-esm/static/index.html')
         self.assertIn('Ubuntu ESM', page)
+        script = self.unit.file_contents(
+            '/srv/ubuntu-esm/bin/ubuntu-esm-mirror')
+        self.assertIn('reprepro', script)
 
     def test_website_relation(self):
         '''The apache-website configures the virtualhost for the static dir.'''

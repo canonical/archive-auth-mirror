@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Mirror a repository
+#
+
+BASEDIR="$(realpath $(dirname $0)/..)"
+
+REPO_DIR="$BASEDIR/static/ubuntu"
+# Variables used by reprepro
+export REPREPRO_BASE_DIR="$BASEDIR/reprepro"
+export REPREPRO_CONFIG_DIR="$REPREPRO_BASE_DIR/conf"
+export GNUPGHOME="$REPREPRO_BASE_DIR/.gnupg"
+
+REPREPRO="reprepro --outdir $REPO_DIR"
+
+$REPREPRO --show-percent update precise-esm
+$REPREPRO deleteunreferenced

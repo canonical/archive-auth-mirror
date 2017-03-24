@@ -10,8 +10,18 @@ from charms.reactive.decorators import hook
 from charmhelpers.core import hookenv
 
 
+# The filesystem tree for the service is as follows:
+#
+#  /srv/ubuntu-esm
+#  ├── bin
+#  │   └── ubuntu-esm-mirror  -- the mirroring script
+#  ├── reprepro
+#  │   └── conf -- reprepro configuration files
+#  └── static   -- the root of the virtualhost, contains the repository
+#
 BASE_DIR = Path('/srv/ubuntu-esm')
-REPREPRO_DIR = BASE_DIR / 'repo'
+REPREPRO_CONF_DIR = BASE_DIR / 'reprepro/conf'
+BIN_DIR = BASE_DIR / 'bin'
 STATIC_DIR = BASE_DIR / 'static'
 
 
@@ -29,9 +39,10 @@ def website_relation():
 
 def _install_resources():
     '''Create tree structure and copy resources from the charm.'''
-    for directory in BASE_DIR, STATIC_DIR, REPREPRO_DIR:
-        directory.mkdir(exist_ok=True)
+    for directory in BASE_DIR, BIN_DIR, REPREPRO_CONF_DIR, STATIC_DIR:
+        directory.mkdir(parents=True, exist_ok=True)
     shutil.copy('resources/index.html', str(STATIC_DIR))
+    shutil.copy('resources/ubuntu-esm-mirror', str(BIN_DIR))
 
 
 def _get_website_relation_config(domain=None):
