@@ -2,7 +2,7 @@ import os
 
 from charmtest import CharmTest
 
-from reactive import ubuntu_esm
+import ubuntu_esm
 
 
 class InstallResourcesTests(CharmTest):
