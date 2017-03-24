@@ -1,7 +1,14 @@
 import shutil
 from pathlib import Path
+import textwrap
 
-from charms.reactive import when_not, set_state
+from charms.reactive import (
+    when_not,
+    set_state,
+)
+from charms.reactive.decorators import hook
+from charmhelpers.core import hookenv
+
 
 # The filesystem tree for the service is as follows:
 #
@@ -24,9 +31,39 @@ def install():
     set_state('ubuntu-esm.installed')
 
 
+@hook('static-website-relation-{joined,changed}')
+def website_relation():
+    config = _get_website_relation_config(domain=hookenv.unit_public_ip())
+    hookenv.relation_set(hookenv.relation_id(), config)
+
+
 def _install_resources():
     '''Create tree structure and copy resources from the charm.'''
     for directory in BASE_DIR, BIN_DIR, REPREPRO_CONF_DIR, STATIC_DIR:
         directory.mkdir(parents=True, exist_ok=True)
     shutil.copy('resources/index.html', str(STATIC_DIR))
     shutil.copy('resources/ubuntu-esm-mirror', str(BIN_DIR))
+
+
+def _get_website_relation_config(domain=None):
+    '''Return the configuration for the 'static-website' relation.'''
+    vhost_config = textwrap.dedent(
+        '''
+        <VirtualHost {domain}:80>
+          DocumentRoot "{document_root}"
+          Options +Indexes
+
+          <Location />
+            Require all granted
+            Options +Indexes
+          </Location>
+        </VirtualHost>
+        '''.format(
+            domain=domain,
+            document_root=STATIC_DIR))
+    return {
+        'domain': domain,
+        'enabled': True,
+        'site_config': vhost_config,
+        'site_modules': ['autoindex'],
+        'ports': '80'}
