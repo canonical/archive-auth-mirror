@@ -33,7 +33,7 @@ def install():
 
 @hook('static-website-relation-{joined,changed}')
 def website_relation():
-    config = _get_website_relation_config(domain=hookenv.unit_public_ip())
+    config = _get_website_relation_config(hookenv.unit_public_ip())
     hookenv.relation_set(hookenv.relation_id(), config)
 
 
@@ -45,7 +45,7 @@ def _install_resources():
     shutil.copy('resources/ubuntu-esm-mirror', str(BIN_DIR))
 
 
-def _get_website_relation_config(domain=None):
+def _get_website_relation_config(domain):
     '''Return the configuration for the 'static-website' relation.'''
     vhost_config = textwrap.dedent(
         '''
