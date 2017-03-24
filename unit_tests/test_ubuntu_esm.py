@@ -1,6 +1,7 @@
 import os
 import textwrap
 import unittest
+from fixtures import TempDir
 
 from charmtest import CharmTest
 
@@ -9,14 +10,24 @@ import ubuntu_esm
 
 class InstallResourcesTests(CharmTest):
 
-    pass
+    def setUp(self):
+        super().setUp()
+        self.base_dir = self.useFixture(TempDir()).path
 
-    # def test_dirs(self):
-    #     '''The _install_resources function creates the filesystem structure.'''
-    #     root_path = self.fakes.fs.root.path
-    #     self.fakes.fs.add('/srv')
-    #     ubuntu_esm._install_resources()
-    #     print(os.listdir(root_path))
+    def test_dirs(self):
+        '''The _install_resources function creates the filesystem structure.'''
+        ubuntu_esm._install_resources(base_dir=self.base_dir)
+        self.assertItemsEqual(
+            ['bin', 'static', 'reprepro'],
+            os.listdir(self.base_dir))
+
+    def test_resources(self):
+        '''Resources from the charm are copied to the service tree.'''
+        ubuntu_esm._install_resources(base_dir=self.base_dir)
+        with open(os.path.join(self.base_dir, 'static/index.html')) as fd:
+            self.assertIn("Ubuntu ESM", fd.read())
+        with open(os.path.join(self.base_dir, 'bin/ubuntu-esm-mirror')) as fd:
+            self.assertIn("reprepro", fd.read())
 
 
 class GetWebsiteRelationConfigTest(unittest.TestCase):

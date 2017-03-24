@@ -20,14 +20,6 @@ class TestCharm(unittest.TestCase):
 
         self.unit = self.d.sentry['ubuntu-esm'][0]
 
-    def test_install(self):
-        '''That that the charm installs expected files.'''
-        page = self.unit.file_contents('/srv/ubuntu-esm/static/index.html')
-        self.assertIn('Ubuntu ESM', page)
-        script = self.unit.file_contents(
-            '/srv/ubuntu-esm/bin/ubuntu-esm-mirror')
-        self.assertIn('reprepro', script)
-
     def test_website_relation(self):
         '''The apache-website configures the virtualhost for the static dir.'''
         url = 'http://{}'.format(self.unit.info['public-address'])
