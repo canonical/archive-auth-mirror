@@ -14,9 +14,12 @@ from charmtest import CharmTest
 
 from charms.ubuntu_esm.utils import (
     get_paths,
+    get_virtualhost_name,
     get_website_relation_config,
     install_resources,
 )
+
+from fakes import FakeHookEnv
 
 
 class GetPathsTest(unittest.TestCase):
@@ -31,6 +34,19 @@ class GetPathsTest(unittest.TestCase):
              'static': Path('/srv/ubuntu-esm/static'),
              'gnupghome': Path('/srv/ubuntu-esm/reprepro/.gnupg')},
             paths)
+
+
+class GetVirtualhostNameTest(unittest.TestCase):
+
+    def test_get_no_config(self):
+        '''If the 'service-url' config is not set, the unit IP is returned.'''
+        hookenv = FakeHookEnv()
+        self.assertEqual('1.2.3.4', get_virtualhost_name(hookenv=hookenv))
+
+    def test_get_with_config(self):
+        '''If the 'service-url' config is set, it's used as virtualhost.'''
+        hookenv = FakeHookEnv(config={'service-url': 'example.com'})
+        self.assertEqual('example.com', get_virtualhost_name(hookenv=hookenv))
 
 
 class GetWebsiteRelationConfigTest(unittest.TestCase):
@@ -54,7 +70,7 @@ class GetWebsiteRelationConfigTest(unittest.TestCase):
              'enabled': True,
              'site_config': expected_site_config,
              'site_modules': ['autoindex'],
-             'ports': '80'},
+             'ports': [80]},
             config)
 
 
