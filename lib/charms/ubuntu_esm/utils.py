@@ -30,24 +30,27 @@ def get_paths(base_dir=None):
         'gnupghome': reprepro_dir / '.gnupg'}
 
 
-def configure_website_relation(domain=None):
+def get_virtualhost_name(hookenv=hookenv):
+    '''Return the configured service URL or the unit address.'''
+    service_url = hookenv.config().get('service-url')
+    return service_url or hookenv.unit_public_ip()
+
+
+def configure_website_relation():
     '''Configure the 'static-website' relation.'''
-    if not domain:
-        domain = hookenv.unit_public_ip()
+    domain = get_virtualhost_name()
     config = get_website_relation_config(domain)
-    if hookenv.in_relation_hook():
-        hookenv.relation_set(hookenv.relation_id(), config)
-    else:
-        for relation_id in hookenv.relation_ids('static-website'):
-            hookenv.relation_set(relation_id, config)
+    for relation_id in hookenv.relation_ids('static-website'):
+        hookenv.relation_set(relation_id, config)
 
 
 def get_website_relation_config(domain):
     '''Return the configuration for the 'static-website' relation.'''
+    port = 80
     paths = get_paths()
     vhost_config = textwrap.dedent(
         '''
-        <VirtualHost {domain}:80>
+        <VirtualHost {domain}:{port}>
           DocumentRoot "{document_root}"
 
           <Location />
@@ -56,14 +59,14 @@ def get_website_relation_config(domain):
           </Location>
         </VirtualHost>
         '''.format(
-            domain=domain,
+            domain=domain, port=port,
             document_root=paths['static']))
     return {
         'domain': domain,
         'enabled': True,
         'site_config': vhost_config,
         'site_modules': ['autoindex'],
-        'ports': '80'}
+        'ports': [port]}
 
 
 def install_resources(base_dir=None):

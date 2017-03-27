@@ -1,5 +1,6 @@
 includes:
   - 'layer:basic'
+  - 'interface:apache-website'
 repo: https://github.com/CanonicalLtd/ubuntu-esm-charm
 options:
   basic:
