@@ -12,19 +12,20 @@ class TestCharm(unittest.TestCase):
         self.d = amulet.Deployment(series='xenial')
 
         self.d.add('apache2')
-        self.d.add('ubuntu-esm')
-        self.d.relate('ubuntu-esm:static-website', 'apache2:apache-website')
+        self.d.add('archive-auth-mirror')
+        self.d.relate(
+            'archive-auth-mirror:static-website', 'apache2:apache-website')
 
         self.d.setup(timeout=900)
         self.d.sentry.wait()
 
-        self.unit = self.d.sentry['ubuntu-esm'][0]
+        self.unit = self.d.sentry['archive-auth-mirror'][0]
 
     def test_website_relation(self):
         '''The apache-website configures the virtualhost for the static dir.'''
         url = 'http://{}'.format(self.unit.info['public-address'])
         page = requests.get(url)
-        self.assertIn('Ubuntu ESM', page.text)
+        self.assertIn('Index of /', page.text)
 
 
 if __name__ == '__main__':

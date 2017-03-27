@@ -10,16 +10,16 @@ def get_paths(base_dir=None):
 
     The filesystem tree for the service is as follows:
 
-    /srv/ubuntu-esm
+    /srv/archive-auth-mirror
     ├── bin
-    │   └── ubuntu-esm-mirror  -- the mirroring script
+    │   └── mirror-archive  -- the mirroring script
     ├── reprepro
     │   └── conf  -- reprepro configuration files
     │       └── .gnupg  -- GPG config for reprepro
     └── static  -- the root of the virtualhost, contains the repository
     '''
     if base_dir is None:
-        base_dir = '/srv/ubuntu-esm'
+        base_dir = '/srv/archive-auth-mirror'
     base_dir = Path(base_dir)
     reprepro_dir = base_dir / 'reprepro'
     return {
@@ -74,5 +74,4 @@ def install_resources(base_dir=None):
     paths = get_paths(base_dir=base_dir)
     for directory in paths.values():
         directory.mkdir(parents=True, exist_ok=True)
-    shutil.copy('resources/index.html', str(paths['static']))
-    shutil.copy('resources/ubuntu-esm-mirror', str(paths['bin']))
+    shutil.copy('resources/mirror-archive', str(paths['bin']))

@@ -5,6 +5,8 @@
 
 BASEDIR="$(realpath $(dirname $0)/..)"
 
+SUITE="precise"  # XXX make this configurable
+
 REPO_DIR="$BASEDIR/static/ubuntu"
 # Variables used by reprepro
 export REPREPRO_BASE_DIR="$BASEDIR/reprepro"
@@ -13,5 +15,5 @@ export GNUPGHOME="$REPREPRO_BASE_DIR/.gnupg"
 
 REPREPRO="reprepro --outdir $REPO_DIR"
 
-$REPREPRO --show-percent update precise-esm
+$REPREPRO --show-percent update "$SUITE"
 $REPREPRO deleteunreferenced

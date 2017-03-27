@@ -5,7 +5,7 @@ options:
     default: ""
   mirror-uri:
     type: string
-    description: "ESM repository to mirror."
+    description: "The repository to mirror."
     default: ""
   mirror-gpg-key:
     type: string

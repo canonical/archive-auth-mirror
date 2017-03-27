@@ -3,7 +3,7 @@ from fixtures import (
     TempDir,
 )
 
-from charms.ubuntu_esm.gpg import import_gpg_keys
+from charms.archive_auth_mirror.gpg import import_gpg_keys
 
 
 PUBLIC_KEY_FINGERPRINT = 'E275C4776E00A6BAED081A97DE2922ADDC4EDFF2'

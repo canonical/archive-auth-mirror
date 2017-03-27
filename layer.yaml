@@ -1,7 +1,7 @@
 includes:
   - 'layer:basic'
   - 'interface:apache-website'
-repo: https://github.com/CanonicalLtd/ubuntu-esm-charm
+repo: https://github.com/CanonicalLtd/archive-auth-mirror
 options:
   basic:
     packages:
