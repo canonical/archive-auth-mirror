@@ -52,7 +52,7 @@ def get_website_relation_config(domain):
     port = 80
     paths = get_paths()
     vhost_config = textwrap.dedent(
-        """
+        '''
         <VirtualHost {domain}:{port}>
           DocumentRoot "{document_root}"
 
@@ -61,7 +61,7 @@ def get_website_relation_config(domain):
             Options +Indexes
           </Location>
         </VirtualHost>
-        """.format(
+        '''.format(
             domain=domain, port=port,
             document_root=paths['static']))
     return {

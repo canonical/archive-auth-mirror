@@ -21,7 +21,7 @@ class ConfigureRepreproTest(CharmTest):
             uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', get_paths=lambda: paths)
         self.assertEqual(
             textwrap.dedent(
-                """\
+                '''\
                 Codename: xenial
                 Label: xenial archive
                 Components: main universe
@@ -29,11 +29,11 @@ class ConfigureRepreproTest(CharmTest):
                 Architectures: i386 amd64
                 SignWith: CDCDCDCD
                 Update: update-repo
-                """),
+                '''),
             (paths['reprepro-conf'] / 'distributions').read_text())
         self.assertEqual(
             textwrap.dedent(
-                """\
+                '''\
                 Name: update-repo
                 Method: https://user:pass@example.com/ubuntu
                 Suite: xenial
@@ -41,7 +41,7 @@ class ConfigureRepreproTest(CharmTest):
                 UDebComponents: main universe
                 Architectures: i386 amd64
                 VerifyRelease: ABABABAB
-                """),
+                '''),
             (paths['reprepro-conf'] / 'updates').read_text())
         self.assertEqual(
             'SUITE=xenial\n', paths['config'].read_text())
