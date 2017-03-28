@@ -2,9 +2,9 @@ language: python
 sudo: required
 python:
   - "3.5"
+install: pip install tox
 script: tox
 addons:
   apt:
     packages:
-      - tox
       - gnupg
