@@ -1,7 +1,4 @@
-from fixtures import (
-    TestWithFixtures,
-    TempDir,
-)
+from charmtest import CharmTest
 
 from charms.archive_auth_mirror.gpg import import_gpg_keys
 
@@ -100,17 +97,13 @@ FUB99LPi8uvx+QjcHLg=
 '''
 
 
-class ImportGpgKeysTest(TestWithFixtures):
-
-    def setUp(self):
-        super().setUp()
-        self.tempdir = self.useFixture(TempDir())
+class ImportGpgKeysTest(CharmTest):
 
     def test_import_key(self):
         '''imort_gpg_keys imports the mirror and sign keys.'''
         fingerprints = import_gpg_keys(
             PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
-            gnupghome=self.tempdir.path)
+            gnupghome=self.fakes.fs.root.path)
         # returned fingerprints are 8 characters long
         self.assertEqual(
             (PUBLIC_KEY_FINGERPRINT[-8:], SECRET_KEY_FINGERPRINT[-8:]),
