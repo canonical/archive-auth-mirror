@@ -6,7 +6,7 @@ from charmhelpers.core import hookenv
 
 
 def get_paths(base_dir=None):
-    '''Return path for the service tree.
+    """Return path for the service tree.
 
     The filesystem tree for the service is as follows:
 
@@ -18,7 +18,7 @@ def get_paths(base_dir=None):
     │   └── conf  -- reprepro configuration files
     │       └── .gnupg  -- GPG config for reprepro
     └── static  -- the root of the virtualhost, contains the repository
-    '''
+    """
     if base_dir is None:
         base_dir = '/srv/archive-auth-mirror'
     base_dir = Path(base_dir)
@@ -34,13 +34,13 @@ def get_paths(base_dir=None):
 
 
 def get_virtualhost_name(hookenv=hookenv):
-    '''Return the configured service URL or the unit address.'''
+    """Return the configured service URL or the unit address."""
     service_url = hookenv.config().get('service-url')
     return service_url or hookenv.unit_public_ip()
 
 
 def configure_website_relation():
-    '''Configure the 'static-website' relation.'''
+    """Configure the 'static-website' relation."""
     domain = get_virtualhost_name()
     config = get_website_relation_config(domain)
     for relation_id in hookenv.relation_ids('static-website'):
@@ -48,11 +48,11 @@ def configure_website_relation():
 
 
 def get_website_relation_config(domain):
-    '''Return the configuration for the 'static-website' relation.'''
+    """Return the configuration for the 'static-website' relation."""
     port = 80
     paths = get_paths()
     vhost_config = textwrap.dedent(
-        '''
+        """
         <VirtualHost {domain}:{port}>
           DocumentRoot "{document_root}"
 
@@ -61,7 +61,7 @@ def get_website_relation_config(domain):
             Options +Indexes
           </Location>
         </VirtualHost>
-        '''.format(
+        """.format(
             domain=domain, port=port,
             document_root=paths['static']))
     return {
@@ -73,7 +73,7 @@ def get_website_relation_config(domain):
 
 
 def install_resources(base_dir=None):
-    '''Create tree structure and copy resources from the charm.'''
+    """Create tree structure and copy resources from the charm."""
     paths = get_paths(base_dir=base_dir)
     for name in ('bin', 'reprepro-conf', 'static', 'gnupghome'):
         paths[name].mkdir(parents=True, exist_ok=True)

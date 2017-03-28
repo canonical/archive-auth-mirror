@@ -7,7 +7,7 @@ from .utils import get_paths
 
 def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,
                        sign_key_fingerprint, get_paths=get_paths):
-    '''Create reprepro configuration files.'''
+    """Create reprepro configuration files."""
     paths = get_paths()
     context = split_repository_uri(mirror_uri)
     context.update(
@@ -28,13 +28,13 @@ def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,
 
 
 def disable_mirroring(get_paths=get_paths):
-    '''Disable mirroring.'''
+    """Disable mirroring."""
     config = get_paths()['config']
     if config.exists():
         config.replace(config.with_suffix('.disabled'))
 
 
 def split_repository_uri(uri):
-    '''Split the repository URI into components.'''
+    """Split the repository URI into components."""
     parts = ('url', 'suite', 'components')
     return dict(zip(parts, uri.split(' ', maxsplit=2)))

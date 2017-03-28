@@ -1,8 +1,8 @@
-'''Fakes for unittests.'''
+"""Fakes for unittests."""
 
 
 class FakeHookEnv:
-    '''A fake hookenv object.'''
+    """A fake hookenv object."""
 
     def __init__(self, config=None):
         self._config = config or {}

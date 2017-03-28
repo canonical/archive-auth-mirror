@@ -22,7 +22,7 @@ class TestCharm(unittest.TestCase):
         self.unit = self.d.sentry['archive-auth-mirror'][0]
 
     def test_website_relation(self):
-        '''The apache-website configures the virtualhost for the static dir.'''
+        """The apache-website configures the virtualhost for the static dir."""
         url = 'http://{}'.format(self.unit.info['public-address'])
         page = requests.get(url)
         self.assertIn('Index of /', page.text)

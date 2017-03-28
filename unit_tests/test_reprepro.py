@@ -14,14 +14,14 @@ from charms.archive_auth_mirror.reprepro import (
 class ConfigureRepreproTest(CharmTest):
 
     def test_configuration_files(self):
-        '''configure_reprepro writes rerepro config files.'''
+        """configure_reprepro writes rerepro config files."""
         paths = get_paths(base_dir=self.fakes.fs.root.path)
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
             uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', get_paths=lambda: paths)
         self.assertEqual(
             textwrap.dedent(
-                '''\
+                """\
                 Codename: xenial
                 Label: xenial archive
                 Components: main universe
@@ -29,11 +29,11 @@ class ConfigureRepreproTest(CharmTest):
                 Architectures: i386 amd64
                 SignWith: CDCDCDCD
                 Update: update-repo
-                '''),
+                """),
             (paths['reprepro-conf'] / 'distributions').read_text())
         self.assertEqual(
             textwrap.dedent(
-                '''\
+                """\
                 Name: update-repo
                 Method: https://user:pass@example.com/ubuntu
                 Suite: xenial
@@ -41,7 +41,7 @@ class ConfigureRepreproTest(CharmTest):
                 UDebComponents: main universe
                 Architectures: i386 amd64
                 VerifyRelease: ABABABAB
-                '''),
+                """),
             (paths['reprepro-conf'] / 'updates').read_text())
         self.assertEqual(
             'SUITE=xenial\n', paths['config'].read_text())
@@ -50,7 +50,7 @@ class ConfigureRepreproTest(CharmTest):
 class DisableMirroringTest(CharmTest):
 
     def test_disable_mirroring(self):
-        '''disable_mirroring renames the script config file.'''
+        """disable_mirroring renames the script config file."""
         paths = get_paths(base_dir=self.fakes.fs.root.path)
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
@@ -67,7 +67,7 @@ class DisableMirroringTest(CharmTest):
         self.assertEqual(orig_content, disabled_file.read_text())
 
     def test_disable_not_enabled(self):
-        '''Disabling mirror when not configured is a no-op.'''
+        """Disabling mirror when not configured is a no-op."""
         paths = get_paths(base_dir=self.fakes.fs.root.path)
         config = paths['config']
         disable_mirroring(get_paths=lambda: paths)
@@ -75,7 +75,7 @@ class DisableMirroringTest(CharmTest):
         self.assertFalse(config.with_suffix('.disabled').exists())
 
     def test_disable_twice_(self):
-        '''disable_mirroring can be called multiple times.'''
+        """disable_mirroring can be called multiple times."""
         paths = get_paths(base_dir=self.fakes.fs.root.path)
         config = paths['config']
         disable_mirroring(get_paths=lambda: paths)
@@ -87,7 +87,7 @@ class DisableMirroringTest(CharmTest):
 class SplitRepositoryUriTest(unittest.TestCase):
 
     def test_uri(self):
-        '''split_repo_uri splits the repository URI into tokens.'''
+        """split_repo_uri splits the repository URI into tokens."""
         tokens = split_repository_uri(
             'https://user:pass@example.com/ubuntu xenial main universe')
         self.assertEqual(
