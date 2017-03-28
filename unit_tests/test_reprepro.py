@@ -87,7 +87,7 @@ class DisableMirroringTest(CharmTest):
 class SplitRepositoryUriTest(unittest.TestCase):
 
     def test_uri(self):
-        """split_repo_uri splits the repository URI into tokens."""
+        """split_repository_uri splits the repository URI into tokens."""
         tokens = split_repository_uri(
             'https://user:pass@example.com/ubuntu xenial main universe')
         self.assertEqual(

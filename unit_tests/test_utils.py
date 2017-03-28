@@ -1,4 +1,3 @@
-import textwrap
 import unittest
 from pathlib import Path
 
@@ -15,7 +14,7 @@ from charmtest import CharmTest
 from charms.archive_auth_mirror.utils import (
     get_paths,
     get_virtualhost_name,
-    get_website_relation_config,
+    get_virtualhost_config,
     install_resources,
 )
 
@@ -51,28 +50,15 @@ class GetVirtualhostNameTest(unittest.TestCase):
         self.assertEqual('example.com', get_virtualhost_name(hookenv=hookenv))
 
 
-class GetWebsiteRelationConfigTest(unittest.TestCase):
+class GetVirtualhostConfigTest(CharmTest):
 
-    def test_config(self):
-        """get_website_relation_config returns the relation configuration."""
-        config = get_website_relation_config('host.example.com')
-
-        expected_site_config = textwrap.dedent("""
-        <VirtualHost host.example.com:80>
-          DocumentRoot "/srv/archive-auth-mirror/static"
-
-          <Location />
-            Require all granted
-            Options +Indexes
-          </Location>
-        </VirtualHost>
-        """)
+    def test_virtualhost_config(self):
+        """get_virtualhost_config returns the config for the virtualhost."""
+        hookenv = FakeHookEnv()
+        config = get_virtualhost_config(hookenv=hookenv)
         self.assertEqual(
-            {'domain': 'host.example.com',
-             'enabled': True,
-             'site_config': expected_site_config,
-             'site_modules': ['autoindex'],
-             'ports': [80]},
+            {'domain': '1.2.3.4',
+             'document_root': '/srv/archive-auth-mirror/static'},
             config)
 
 
