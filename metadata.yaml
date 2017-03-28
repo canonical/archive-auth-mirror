@@ -1,9 +1,9 @@
-name: ubuntu-esm
-summary: Ubuntu ESM (Extended Security Maintenance)
+name: archive-auth-mirror
+summary: Sync an Ubuntu repository and provide an authenticate mirror.
 maintainer: Canonical Landscape Team <landscape-crew@lists.canonical.com>
 description: |
-  This subordinate charm provides an HTTPS mirror of the Ubuntu ESM archive,
-  and authorization.
+  This subordinate charm provides an HTTPS mirror with BasicAuth of an Ubuntu
+  archive.
 series:
   - xenial
 tags:

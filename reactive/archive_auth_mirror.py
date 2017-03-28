@@ -7,22 +7,23 @@ from charms.reactive import (
 from charmhelpers.core import hookenv
 from charmhelpers.fetch import apt_install
 
-from charms.ubuntu_esm.utils import (
+from charms.archive_auth_mirror.utils import (
     configure_website_relation,
     get_website_relation_config,
     install_resources,
 )
 
-from charms.ubuntu_esm.gpg import import_gpg_keys
+from charms.archive_auth_mirror.gpg import import_gpg_keys
+
 
 PACKAGES = ['reprepro']
 
 
-@when_not('ubuntu-esm.installed')
+@when_not('archive-auth-mirror.installed')
 def install():
     apt_install(PACKAGES, fatal=True)
     install_resources()
-    set_state('ubuntu-esm.installed')
+    set_state('archive-auth-mirror.installed')
 
 
 @when('config.changed.service-url')

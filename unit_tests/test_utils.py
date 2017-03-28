@@ -12,7 +12,7 @@ from testtools.matchers import (
 
 from charmtest import CharmTest
 
-from charms.ubuntu_esm.utils import (
+from charms.archive_auth_mirror.utils import (
     get_paths,
     get_virtualhost_name,
     get_website_relation_config,
@@ -28,11 +28,11 @@ class GetPathsTest(unittest.TestCase):
         '''get_paths returns service paths.'''
         paths = get_paths()
         self.assertEqual(
-            {'base': Path('/srv/ubuntu-esm'),
-             'bin': Path('/srv/ubuntu-esm/bin'),
-             'reprepro': Path('/srv/ubuntu-esm/reprepro'),
-             'static': Path('/srv/ubuntu-esm/static'),
-             'gnupghome': Path('/srv/ubuntu-esm/reprepro/.gnupg')},
+            {'base': Path('/srv/archive-auth-mirror'),
+             'bin': Path('/srv/archive-auth-mirror/bin'),
+             'reprepro': Path('/srv/archive-auth-mirror/reprepro'),
+             'static': Path('/srv/archive-auth-mirror/static'),
+             'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg')},
             paths)
 
 
@@ -57,7 +57,7 @@ class GetWebsiteRelationConfigTest(unittest.TestCase):
 
         expected_site_config = textwrap.dedent('''
         <VirtualHost host.example.com:80>
-          DocumentRoot "/srv/ubuntu-esm/static"
+          DocumentRoot "/srv/archive-auth-mirror/static"
 
           <Location />
             Require all granted
@@ -90,8 +90,5 @@ class InstallResourcesTests(CharmTest):
         '''Resources from the charm are copied to the service tree.'''
         install_resources(base_dir=self.base_dir.path)
         self.assertThat(
-            self.base_dir.join('static/index.html'),
-            FileContains(matcher=Contains("Ubuntu ESM")))
-        self.assertThat(
-            self.base_dir.join('bin/ubuntu-esm-mirror'),
+            self.base_dir.join('bin/mirror-archive'),
             FileContains(matcher=Contains("reprepro")))
