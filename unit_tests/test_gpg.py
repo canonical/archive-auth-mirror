@@ -111,6 +111,7 @@ class ImportGpgKeysTest(TestWithFixtures):
         fingerprints = import_gpg_keys(
             PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
             gnupghome=self.tempdir.path)
+        # returned fingerprints are 8 characters long
         self.assertEqual(
-            (PUBLIC_KEY_FINGERPRINT, SECRET_KEY_FINGERPRINT),
+            (PUBLIC_KEY_FINGERPRINT[-8:], SECRET_KEY_FINGERPRINT[-8:]),
             fingerprints)

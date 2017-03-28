@@ -13,7 +13,7 @@ from charms.archive_auth_mirror.utils import (
     install_resources,
 )
 
-from charms.archive_auth_mirror.gpg import import_gpg_keys
+from charms.archive_auth_mirror import gpg, reprepro
 
 
 PACKAGES = ['reprepro']
@@ -35,15 +35,18 @@ def config_service_url():
 def config_changed():
     config = hookenv.config()
     mirror_uri = config.get('mirror-uri')
+    mirror_archs = config.get('mirror-archs')
     mirror_key = config.get('mirror-gpg-key')
     sign_key = config.get('sign-gpg-key')
 
-    if mirror_uri and mirror_key and sign_key:
-        mirror_fprint, sign_fprint = import_gpg_keys(mirror_key, sign_key)
-        # XXX for now just log the imported keys
-        hookenv.log(
-            "import keys fingerprints {} {}".format(
-                mirror_fprint, sign_fprint))
+    if mirror_uri and mirror_archs and mirror_key and sign_key:
+        mirror_fprint, sign_fprint = gpg.import_gpg_keys(mirror_key, sign_key)
+        reprepro.configure_reprepro(
+            mirror_uri, mirror_archs, mirror_fprint, sign_fprint)
+        hookenv.log('Configured mirroring')
+    else:
+        reprepro.disable_mirroring()
+        hookenv.log('Not all required configs set, mirroring is disabled')
 
 
 @when('static-website.available')

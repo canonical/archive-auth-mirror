@@ -30,7 +30,9 @@ class GetPathsTest(unittest.TestCase):
         self.assertEqual(
             {'base': Path('/srv/archive-auth-mirror'),
              'bin': Path('/srv/archive-auth-mirror/bin'),
+             'config': Path('/srv/archive-auth-mirror/config'),
              'reprepro': Path('/srv/archive-auth-mirror/reprepro'),
+             'reprepro-conf': Path('/srv/archive-auth-mirror/reprepro/conf'),
              'static': Path('/srv/archive-auth-mirror/static'),
              'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg')},
             paths)

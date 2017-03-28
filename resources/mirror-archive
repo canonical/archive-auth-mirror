@@ -5,13 +5,17 @@
 
 BASEDIR="$(realpath $(dirname $0)/..)"
 
-SUITE="precise"  # XXX make this configurable
-
 REPO_DIR="$BASEDIR/static/ubuntu"
 # Variables used by reprepro
 export REPREPRO_BASE_DIR="$BASEDIR/reprepro"
 export REPREPRO_CONFIG_DIR="$REPREPRO_BASE_DIR/conf"
 export GNUPGHOME="$REPREPRO_BASE_DIR/.gnupg"
+
+# Load the config file if present.
+#
+# currently, it must define the $SUITE variable
+#
+. "$BASEDIR/config" || exit
 
 REPREPRO="reprepro --outdir $REPO_DIR"
 

@@ -5,8 +5,16 @@ options:
     default: ""
   mirror-uri:
     type: string
-    description: "The repository to mirror."
+    description: |
+      The URI of the repository to mirror.
+      The format is the following:
+
+      http[s]://[<user>:<pass>@]<hostname>/<path> <suite> <components>
     default: ""
+  mirror-archs:
+    type: string
+    description: "A comma-separated list of architectures to mirror."
+    default: "sources i386 amd64"
   mirror-gpg-key:
     type: string
     description: "GPG key for the repository to mirror."

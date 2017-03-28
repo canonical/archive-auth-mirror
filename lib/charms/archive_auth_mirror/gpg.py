@@ -13,6 +13,6 @@ def import_gpg_keys(mirror_key, sign_key, gnupghome=None):
     imported_sign_key = gpg.import_keys(sign_key)
 
     def fingerprint(imported):
-        return imported.results[0]['fingerprint']
+        return imported.results[0]['fingerprint'][-8:]
 
     return fingerprint(imported_mirror_key), fingerprint(imported_sign_key)

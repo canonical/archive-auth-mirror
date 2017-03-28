@@ -13,6 +13,7 @@ def get_paths(base_dir=None):
     /srv/archive-auth-mirror
     ├── bin
     │   └── mirror-archive  -- the mirroring script
+    ├── config  -- the script configuration file
     ├── reprepro
     │   └── conf  -- reprepro configuration files
     │       └── .gnupg  -- GPG config for reprepro
@@ -25,7 +26,9 @@ def get_paths(base_dir=None):
     return {
         'base': base_dir,
         'bin': base_dir / 'bin',
+        'config': base_dir / 'config',
         'reprepro': reprepro_dir,
+        'reprepro-conf': reprepro_dir / 'conf',
         'static': base_dir / 'static',
         'gnupghome': reprepro_dir / '.gnupg'}
 
@@ -72,6 +75,6 @@ def get_website_relation_config(domain):
 def install_resources(base_dir=None):
     '''Create tree structure and copy resources from the charm.'''
     paths = get_paths(base_dir=base_dir)
-    for directory in paths.values():
-        directory.mkdir(parents=True, exist_ok=True)
+    for name in ('bin', 'reprepro-conf', 'static', 'gnupghome'):
+        paths[name].mkdir(parents=True, exist_ok=True)
     shutil.copy('resources/mirror-archive', str(paths['bin']))
