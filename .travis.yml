@@ -2,3 +2,8 @@ language: python
 python:
   - "3.5"
 script: tox
+addons:
+  apt:
+    packages:
+      - tox
+      - gnupg
