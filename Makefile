@@ -12,16 +12,12 @@ help: ## Print help about available targets
 .PHONY: charm-build
 charm-build:  ## Build the charm
 	rm -rf $(CHARM_OUTPUT)
-	INTERFACE_PATH=interfaces charm build -s $(CHARM_SERIES) -o $(CHARM_OUTPUT)
+	charm build -s $(CHARM_SERIES) -o $(CHARM_OUTPUT)
 
 .PHONY: charm-push
 charm-push: charm-build ## Push the rendered charm to the charm store
 	echo -n "commit-sha-1: "  > $(RENDERED_CHARM_DIR)/repo-info
 	echo $(shell git rev-parse HEAD) >> $(RENDERED_CHARM_DIR)/repo-info
 	charm push $(RENDERED_CHARM_DIR) $(RENDERED_CHARM_URI)
-
-$(RENDERED_CHARM_DIR):
-	$(MAKE) charm-build
-
 
 .DEFAULT_GOAL := help
