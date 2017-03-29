@@ -3,7 +3,7 @@ dist: trusty
 sudo: required
 python:
   - "3.5"
-install: pip install tox
+install: pip install flake8 tox
 script: tox
 addons:
   apt:
