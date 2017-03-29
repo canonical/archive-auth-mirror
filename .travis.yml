@@ -9,3 +9,4 @@ addons:
   apt:
     packages:
       - gnupg
+      - apache2-utils

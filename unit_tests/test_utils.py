@@ -1,4 +1,6 @@
 import unittest
+import os
+import stat
 from pathlib import Path
 
 from fixtures import TempDir
@@ -33,7 +35,8 @@ class GetPathsTest(unittest.TestCase):
              'reprepro': Path('/srv/archive-auth-mirror/reprepro'),
              'reprepro-conf': Path('/srv/archive-auth-mirror/reprepro/conf'),
              'static': Path('/srv/archive-auth-mirror/static'),
-             'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg')},
+             'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg'),
+             'basic-auth': Path('/srv/archive-auth-mirror/basic-auth')},
             paths)
 
 
@@ -68,11 +71,12 @@ class InstallResourcesTests(CharmTest):
         super().setUp()
         self.base_dir = self.useFixture(TempDir())
 
-    def test_dirs(self):
+    def test_tree(self):
         """The install_resources function creates the filesystem structure."""
         install_resources(base_dir=self.base_dir.path)
         self.assertThat(
-            self.base_dir.path, DirContains(['bin', 'static', 'reprepro']))
+            self.base_dir.path,
+            DirContains(['basic-auth', 'bin', 'static', 'reprepro']))
 
     def test_resources(self):
         """Resources from the charm are copied to the service tree."""
@@ -80,3 +84,8 @@ class InstallResourcesTests(CharmTest):
         self.assertThat(
             self.base_dir.join('bin/mirror-archive'),
             FileContains(matcher=Contains("reprepro")))
+        self.assertThat(
+            self.base_dir.join('bin/manage-user'),
+            FileContains(matcher=Contains("htpasswd")))
+        self.assertEqual(
+            0o100400, os.stat(self.base_dir.join('basic-auth')).st_mode)

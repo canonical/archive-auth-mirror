@@ -10,6 +10,7 @@ def get_paths(base_dir=None):
     The filesystem tree for the service is as follows:
 
     /srv/archive-auth-mirror
+    ├── basic-auth -- the file containing BasicAuth username/passwords
     ├── bin
     │   └── mirror-archive  -- the mirroring script
     ├── config  -- the script configuration file
@@ -29,7 +30,8 @@ def get_paths(base_dir=None):
         'reprepro': reprepro_dir,
         'reprepro-conf': reprepro_dir / 'conf',
         'static': base_dir / 'static',
-        'gnupghome': reprepro_dir / '.gnupg'}
+        'gnupghome': reprepro_dir / '.gnupg',
+        'basic-auth': base_dir / 'basic-auth'}
 
 
 def get_virtualhost_name(hookenv=hookenv):
@@ -50,4 +52,9 @@ def install_resources(base_dir=None):
     paths = get_paths(base_dir=base_dir)
     for name in ('bin', 'reprepro-conf', 'static', 'gnupghome'):
         paths[name].mkdir(parents=True, exist_ok=True)
+
+    # create an empty basic-auth password file, only readable by root
+    paths['basic-auth'].touch(mode=0o400)
+    # copy scripts
     shutil.copy('resources/mirror-archive', str(paths['bin']))
+    shutil.copy('resources/manage-user', str(paths['bin']))
