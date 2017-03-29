@@ -12,7 +12,7 @@ Credentials for basic authentication can be created with:
 $ juju run --application archive-auth-mirror '/srv/archive-auth-mirror/bin/manage-user add <user> <pass>'
 ```
 
-If the user is already present, its password will be updated.
+If the user is already present, their password will be updated.
 
 To remove a user, run
 
