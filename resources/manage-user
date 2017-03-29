@@ -43,6 +43,7 @@ def add_user(auth_file, user, passwd):
         ['htpasswd', '-Bi', str(auth_file), user],
         stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
     process.communicate(passwd.encode('utf8'))
+    process.wait()
 
 
 def list_users(auth_file):
