@@ -17,7 +17,7 @@ charm-build:  ## Build the charm
 .PHONY: charm-push
 charm-push: charm-build ## Push the rendered charm to the charm store
 	echo -n "commit-sha-1: "  > $(RENDERED_CHARM_DIR)/repo-info
-	echo $(shell git rev-parse HEAD) >> $(RENDERED_CHARM_DIR)/repo-info
+	git rev-parse HEAD >> $(RENDERED_CHARM_DIR)/repo-info
 	charm push $(RENDERED_CHARM_DIR) $(RENDERED_CHARM_URI)
 
 .DEFAULT_GOAL := help
