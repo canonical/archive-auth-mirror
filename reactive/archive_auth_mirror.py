@@ -1,29 +1,40 @@
 from charmhelpers.core import hookenv
 
-from charms.reactive import when, when_not
+from charms.reactive import when, when_not, set_state
 
 from charms.layer.nginx import configure_site
 from charms.archive_auth_mirror import gpg, reprepro, utils
 
 
-@when('nginx.available')
-def configure_webapp():
+def charm_state(state):
+    """Convenience to return a reactive state name for this charm."""
+    return 'archive-auth-mirror.{}'.format(state)
+
+
+@when_not(charm_state('installed'))
+def install():
     utils.install_resources()
+    set_state(charm_state('installed'))
+
+
+@when(charm_state('installed'), 'nginx.available')
+def configure_webapp():
     configure_static_serve()
 
 
-@when('nginx.available', 'website.available')
+@when(charm_state('installed'), 'nginx.available', 'website.available')
 def configure_website(website):
     website.configure(port=hookenv.config()['port'])
 
 
-@when('config.changed.mirror-uri')
+@when(charm_state('installed'), 'config.changed.mirror-uri')
 def config_mirror_uri_changed():
     configure_static_serve()
 
 
-@when('config.set.mirror-uri', 'config.set.mirror-archs',
-      'config.set.mirror-gpg-key', 'config.set.sign-gpg-key')
+@when(charm_state('installed'), 'config.set.mirror-uri',
+      'config.set.mirror-archs', 'config.set.mirror-gpg-key',
+      'config.set.sign-gpg-key')
 def config_set():
     config = hookenv.config()
 

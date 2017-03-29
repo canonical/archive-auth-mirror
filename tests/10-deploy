@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 import unittest
 
@@ -8,6 +8,7 @@ import amulet
 
 
 class TestCharm(unittest.TestCase):
+
     def setUp(self):
         self.d = amulet.Deployment(series='xenial')
         self.d.add('archive-auth-mirror')
@@ -15,13 +16,22 @@ class TestCharm(unittest.TestCase):
         self.d.sentry.wait()
 
         self.unit = self.d.sentry['archive-auth-mirror'][0]
+        self.unit_address = self.unit.info['public-address']
 
-    def test_deploy(self):
-        """The service provides static file serving."""
-        url = 'http://{}'.format(self.unit.info['public-address'])
-        page = requests.get(url)
-        self.assertIn('Index of /', page.text)
+    def test_10_basic_auth_required(self):
+        """BasicAuth is required for the repository."""
+        url = 'http://{}'.format(self.unit_address)
+        response = requests.get(url)
+        self.assertEqual(401, response.status_code)
+        self.assertIn('401 Authorization Required', response.text)
 
+    def test_20_static_serve(self):
+        """The service provides static file serving with BasicAuth."""
+        self.unit.run('/srv/archive-auth-mirror/bin/manage-user add foo bar')
+        url = 'http://foo:bar@{}'.format(self.unit_address)
+        response = requests.get(url)
+        self.assertEqual(200, response.status_code)
+        self.assertIn('Index of /', response.text)
 
 if __name__ == '__main__':
     unittest.main()

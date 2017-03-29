@@ -24,7 +24,7 @@ def get_parser():
 
     add_action = subparsers.add_parser(
         'add',
-        help='add  a user. If the user exists, their password is updated')
+        help='add a user. If the user exists, their password is updated')
     add_action.add_argument('user', help='the username to add')
     add_action.add_argument('password', help='the password for the user')
 
@@ -39,7 +39,7 @@ def get_parser():
 def add_user(auth_file, user, passwd):
     """Add a user."""
     subprocess.run(
-        ['htpasswd', '-Bi', str(auth_file), user],
+        ['htpasswd', '-i', str(auth_file), user],
         input=passwd.encode('utf8'), stderr=subprocess.DEVNULL,
         check=True)
 

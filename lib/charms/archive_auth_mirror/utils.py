@@ -1,7 +1,9 @@
+import os
 from pathlib import Path
 import shutil
 
 from charmhelpers.core import hookenv
+from charmhelpers.core import host
 
 
 def get_paths(base_dir=None):
@@ -44,17 +46,27 @@ def get_virtualhost_config(hookenv=hookenv):
     """Return the configuration for the static virtuahost."""
     paths = get_paths()
     domain = get_virtualhost_name(hookenv=hookenv)
-    return {'domain': domain, 'document_root': str(paths['static'])}
+    return {
+        'domain': domain,
+        'document_root': str(paths['static']),
+        'basic_auth_file': str(paths['basic-auth'])}
 
 
 def install_resources(base_dir=None):
     """Create tree structure and copy resources from the charm."""
     paths = get_paths(base_dir=base_dir)
-    for name in ('bin', 'reprepro-conf', 'static', 'gnupghome'):
-        paths[name].mkdir(parents=True, exist_ok=True)
+    for name in ('bin', 'reprepro-conf', 'static'):
+        host.mkdir(str(paths[name]), perms=0o755)
 
-    # create an empty basic-auth password file, only readable by root
-    paths['basic-auth'].touch(mode=0o400)
+    # the gpg directory should only be readable by root
+    host.mkdir(str(paths['gnupghome']), perms=0o700)
+
+    # create an empty basic-auth password file. It will be updated by a script
+    # run as root, but it must be readable by the web server
+    host.write_file(
+        str(paths['basic-auth']), b'', group='www-data', perms=0o640)
+
     # copy scripts
-    shutil.copy('resources/mirror-archive', str(paths['bin']))
-    shutil.copy('resources/manage-user', str(paths['bin']))
+    for resource in ('mirror-archive', 'manage-user'):
+        resource_path = os.path.join('resources', resource)
+        shutil.copy(resource_path, str(paths['bin']))
