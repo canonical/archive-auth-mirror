@@ -21,13 +21,18 @@ def get_parser():
     action = subparsers = parser.add_subparsers(
         dest='action', help='action to perform')
     action.required = True
+
     add_action = subparsers.add_parser(
-        'add', help='add  a user. If the user exists, the password is updated')
+        'add',
+        help='add  a user. If the user exists, their password is updated')
     add_action.add_argument('user', help='the username to add')
     add_action.add_argument('password', help='the password for the user')
+
     subparsers.add_parser('list', help='list users')
+
     remove_action = subparsers.add_parser('remove', help='remove a user')
     remove_action.add_argument('user', help='the user to remove')
+
     return parser
 
 
@@ -35,7 +40,7 @@ def add_user(auth_file, user, passwd):
     '''Add a user.'''
     auth_file.touch()  # ensure the file exists
     subprocess.check_call(
-        ['htpasswd', '-b', str(auth_file), user, passwd],
+        ['htpasswd', '-Bb', str(auth_file), user, passwd],
         stderr=subprocess.DEVNULL)
 
 
@@ -43,7 +48,7 @@ def list_users(auth_file):
     '''List existing users.'''
     if not auth_file.exists():
         return []
-    with open(str(auth_file)) as fh:
+    with auth_file.open() as fh:
         return [line.split(':')[0] for line in fh]
 
 
