@@ -33,7 +33,7 @@ def config_set():
     reprepro.configure_reprepro(
         config['mirror-uri'], config['mirror-archs'], mirror_fprint,
         sign_fprint)
-    hookenv.status_set('active', 'Mirrorining configured')
+    hookenv.status_set('active', 'Mirroring configured')
 
 
 @when_not('config.set.mirror-uri', 'config.set.mirror-archs',
