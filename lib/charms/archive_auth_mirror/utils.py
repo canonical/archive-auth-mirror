@@ -41,7 +41,7 @@ def get_virtualhost_name(hookenv=hookenv):
 
 
 def get_virtualhost_config(hookenv=hookenv):
-    '''Return the configuration for the static virtuahost.'''
+    """Return the configuration for the static virtuahost."""
     paths = get_paths()
     domain = get_virtualhost_name(hookenv=hookenv)
     return {'domain': domain, 'document_root': str(paths['static'])}

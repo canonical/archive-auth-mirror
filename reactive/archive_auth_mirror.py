@@ -45,7 +45,7 @@ def config_not_set():
 
 
 def configure_static_serve():
-    '''Configure the static file serve.'''
+    """Configure the static file serve."""
     vhost_config = utils.get_virtualhost_config()
     configure_site(
         'archive-auth-mirror', 'nginx-static.j2', **vhost_config)
