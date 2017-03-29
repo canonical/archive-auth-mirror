@@ -38,7 +38,6 @@ def get_parser():
 
 def add_user(auth_file, user, passwd):
     """Add a user."""
-    auth_file.touch()  # ensure the file exists
     subprocess.run(
         ['htpasswd', '-Bi', str(auth_file), user],
         input=passwd.encode('utf8'), stderr=subprocess.DEVNULL,
@@ -54,6 +53,7 @@ def list_users(auth_file):
 
 
 def remove_user(auth_file, user):
+    """Remove a user"""
     subprocess.check_call(
         ['htpasswd', '-D', str(auth_file), user],
         stderr=subprocess.DEVNULL)

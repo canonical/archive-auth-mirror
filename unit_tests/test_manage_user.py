@@ -16,14 +16,10 @@ class ManageUserTest(TestWithFixtures):
         super().setUp()
         tempdir = self.useFixture(TempDir())
         self.auth_file = Path(tempdir.path) / 'auth-file'
+        self.auth_file.touch()
 
     def test_add_user(self):
         """add_user adds the user with the specified password."""
-        manage_user.add_user(self.auth_file, 'user', 'pass1')
-        self.assertIn('user:', self.auth_file.read_text())
-
-    def test_add_user_existing_file(self):
-        """add_user adds a user if the file already exists."""
         manage_user.add_user(self.auth_file, 'user1', 'pass1')
         manage_user.add_user(self.auth_file, 'user2', 'pass2')
         self.assertIn('user1:', self.auth_file.read_text())
