@@ -1,6 +1,7 @@
 includes:
   - 'layer:basic'
   - 'layer:nginx'
+  - 'layer:nagios'
 repo: https://github.com/CanonicalLtd/archive-auth-mirror
 options:
   basic:
