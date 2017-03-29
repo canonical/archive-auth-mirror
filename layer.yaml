@@ -1,9 +1,10 @@
 includes:
   - 'layer:basic'
-  - 'interface:apache-website'
+  - 'layer:nginx'
 repo: https://github.com/CanonicalLtd/archive-auth-mirror
 options:
   basic:
     packages:
       - gnupg
+      - reprepro
     use_venv: true

@@ -1,5 +1,4 @@
 from pathlib import Path
-import textwrap
 import shutil
 
 from charmhelpers.core import hookenv
@@ -39,37 +38,11 @@ def get_virtualhost_name(hookenv=hookenv):
     return service_url or hookenv.unit_public_ip()
 
 
-def configure_website_relation():
-    """Configure the 'static-website' relation."""
-    domain = get_virtualhost_name()
-    config = get_website_relation_config(domain)
-    for relation_id in hookenv.relation_ids('static-website'):
-        hookenv.relation_set(relation_id, config)
-
-
-def get_website_relation_config(domain):
-    """Return the configuration for the 'static-website' relation."""
-    port = 80
+def get_virtualhost_config(hookenv=hookenv):
+    '''Return the configuration for the static virtuahost.'''
     paths = get_paths()
-    vhost_config = textwrap.dedent(
-        '''
-        <VirtualHost {domain}:{port}>
-          DocumentRoot "{document_root}"
-
-          <Location />
-            Require all granted
-            Options +Indexes
-          </Location>
-        </VirtualHost>
-        '''.format(
-            domain=domain, port=port,
-            document_root=paths['static']))
-    return {
-        'domain': domain,
-        'enabled': True,
-        'site_config': vhost_config,
-        'site_modules': ['autoindex'],
-        'ports': [port]}
+    domain = get_virtualhost_name(hookenv=hookenv)
+    return {'domain': domain, 'document_root': str(paths['static'])}
 
 
 def install_resources(base_dir=None):

@@ -1,0 +1,13 @@
+server {
+    server_name {{ domain }};
+
+    listen {{ port }};
+    listen [::]:{{ port }};
+
+    root {{ document_root }};
+
+    location / {
+        autoindex on;
+    }
+}
+

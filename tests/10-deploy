@@ -10,19 +10,14 @@ import amulet
 class TestCharm(unittest.TestCase):
     def setUp(self):
         self.d = amulet.Deployment(series='xenial')
-
-        self.d.add('apache2')
         self.d.add('archive-auth-mirror')
-        self.d.relate(
-            'archive-auth-mirror:static-website', 'apache2:apache-website')
-
         self.d.setup(timeout=900)
         self.d.sentry.wait()
 
         self.unit = self.d.sentry['archive-auth-mirror'][0]
 
-    def test_website_relation(self):
-        """The apache-website configures the virtualhost for the static dir."""
+    def test_deploy(self):
+        """The service provides static file serving."""
         url = 'http://{}'.format(self.unit.info['public-address'])
         page = requests.get(url)
         self.assertIn('Index of /', page.text)
