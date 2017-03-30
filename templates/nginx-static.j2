@@ -7,6 +7,8 @@ server {
     root {{ document_root }};
 
     location / {
+        auth_basic "{{ domain }} archive";
+        auth_basic_user_file {{ basic_auth_file }};
         autoindex on;
     }
 }
