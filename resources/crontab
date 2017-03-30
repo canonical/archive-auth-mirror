@@ -1,0 +1,2 @@
+#  m h dom mon dow user  command
+*/15 *   *   *   * root  /srv/archive-auth-mirror/bin/mirror-archive
