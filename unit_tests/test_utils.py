@@ -70,6 +70,7 @@ class InstallResourcesTests(CharmTest):
     def setUp(self):
         super().setUp()
         self.base_dir = self.useFixture(TempDir())
+        self.cron_dir = self.useFixture(TempDir())
 
         patcher_chown = mock.patch('os.chown')
         patcher_chown.start()
@@ -86,25 +87,32 @@ class InstallResourcesTests(CharmTest):
 
     def test_tree(self):
         """The install_resources function creates the filesystem structure."""
-        install_resources(base_dir=self.base_dir.path)
+        install_resources(
+            base_dir=self.base_dir.path, cron_dir=Path(self.cron_dir.path))
         self.assertThat(
             self.base_dir.path,
             DirContains(['basic-auth', 'bin', 'static', 'reprepro']))
 
     def test_resources(self):
         """Resources from the charm are copied to the service tree."""
-        install_resources(base_dir=self.base_dir.path)
+        install_resources(
+            base_dir=self.base_dir.path, cron_dir=Path(self.cron_dir.path))
         self.assertThat(
             self.base_dir.join('bin/mirror-archive'),
             FileContains(matcher=Contains("reprepro")))
         self.assertThat(
             self.base_dir.join('bin/manage-user'),
             FileContains(matcher=Contains("htpasswd")))
+        script_path = '/srv/archive-auth-mirror/bin/mirror-archive'
+        self.assertThat(
+            self.cron_dir.join('archive-auth-mirror'),
+            FileContains(matcher=Contains(script_path)))
         self.assertEqual(
             0o100640, os.stat(self.base_dir.join('basic-auth')).st_mode)
 
     def test_basic_auth_file_owner(self):
         """The basic-auth file is group-owned by www-data."""
-        install_resources(base_dir=self.base_dir.path)
+        install_resources(
+            base_dir=self.base_dir.path, cron_dir=Path(self.cron_dir.path))
         # the file ownership is changed to the gid for www-data
         self.mock_fchown.assert_called_with(mock.ANY, 0, 123)

@@ -52,8 +52,12 @@ def get_virtualhost_config(hookenv=hookenv):
         'basic_auth_file': str(paths['basic-auth'])}
 
 
-def install_resources(base_dir=None):
+def install_resources(base_dir=None, cron_dir=None):
     """Create tree structure and copy resources from the charm."""
+    if cron_dir is None:
+        cron_dir = '/etc/cron.d'
+    cron_dir = Path(cron_dir)
+
     paths = get_paths(base_dir=base_dir)
     for name in ('bin', 'reprepro-conf', 'static'):
         host.mkdir(str(paths[name]), perms=0o755)
@@ -70,3 +74,6 @@ def install_resources(base_dir=None):
     for resource in ('mirror-archive', 'manage-user'):
         resource_path = os.path.join('resources', resource)
         shutil.copy(resource_path, str(paths['bin']))
+    # install crontab
+    crontab_file = cron_dir.joinpath('archive-auth-mirror')
+    shutil.copy('resources/crontab', str(crontab_file))
