@@ -25,7 +25,6 @@ class ConfigureRepreproTest(CharmTest):
                 Codename: xenial
                 Label: xenial archive
                 Components: main universe
-                UDebComponents: main universe
                 Architectures: i386 amd64
                 SignWith: CDCDCDCD
                 Update: update-repo
@@ -38,7 +37,6 @@ class ConfigureRepreproTest(CharmTest):
                 Method: https://user:pass@example.com/ubuntu
                 Suite: xenial
                 Components: main universe
-                UDebComponents: main universe
                 Architectures: i386 amd64
                 VerifyRelease: ABABABAB
                 '''),
