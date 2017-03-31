@@ -6,7 +6,7 @@ from charmhelpers.core import hookenv
 from charmhelpers.core import host
 
 
-def get_paths(base_dir=None):
+def get_paths(root_dir=None):
     """Return path for the service tree.
 
     The filesystem tree for the service is as follows:
@@ -21,19 +21,20 @@ def get_paths(base_dir=None):
     │       └── .gnupg  -- GPG config for reprepro
     └── static  -- the root of the virtualhost, contains the repository
     """
-    if base_dir is None:
-        base_dir = '/srv/archive-auth-mirror'
-    base_dir = Path(base_dir)
+    if root_dir is None:
+        root_dir = Path('/')
+    base_dir = root_dir / 'srv/archive-auth-mirror'
     reprepro_dir = base_dir / 'reprepro'
     return {
         'base': base_dir,
+        'cron': root_dir / 'etc/cron.d/archive-auth-mirror',
         'bin': base_dir / 'bin',
         'config': base_dir / 'config',
+        'static': base_dir / 'static',
+        'basic-auth': base_dir / 'basic-auth',
         'reprepro': reprepro_dir,
         'reprepro-conf': reprepro_dir / 'conf',
-        'static': base_dir / 'static',
-        'gnupghome': reprepro_dir / '.gnupg',
-        'basic-auth': base_dir / 'basic-auth'}
+        'gnupghome': reprepro_dir / '.gnupg'}
 
 
 def get_virtualhost_name(hookenv=hookenv):
@@ -52,13 +53,9 @@ def get_virtualhost_config(hookenv=hookenv):
         'basic_auth_file': str(paths['basic-auth'])}
 
 
-def install_resources(base_dir=None, cron_dir=None):
+def install_resources(root_dir=None):
     """Create tree structure and copy resources from the charm."""
-    if cron_dir is None:
-        cron_dir = '/etc/cron.d'
-    cron_dir = Path(cron_dir)
-
-    paths = get_paths(base_dir=base_dir)
+    paths = get_paths(root_dir=root_dir)
     for name in ('bin', 'reprepro-conf', 'static'):
         host.mkdir(str(paths[name]), perms=0o755)
 
@@ -75,5 +72,4 @@ def install_resources(base_dir=None, cron_dir=None):
         resource_path = os.path.join('resources', resource)
         shutil.copy(resource_path, str(paths['bin']))
     # install crontab
-    crontab_file = cron_dir.joinpath('archive-auth-mirror')
-    shutil.copy('resources/crontab', str(crontab_file))
+    shutil.copy('resources/crontab', str(paths['cron']))

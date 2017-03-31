@@ -29,13 +29,14 @@ class GetPathsTest(TestCase):
         paths = get_paths()
         self.assertEqual(
             {'base': Path('/srv/archive-auth-mirror'),
+             'cron': Path('/etc/cron.d/archive-auth-mirror'),
              'bin': Path('/srv/archive-auth-mirror/bin'),
              'config': Path('/srv/archive-auth-mirror/config'),
+             'static': Path('/srv/archive-auth-mirror/static'),
+             'basic-auth': Path('/srv/archive-auth-mirror/basic-auth'),
              'reprepro': Path('/srv/archive-auth-mirror/reprepro'),
              'reprepro-conf': Path('/srv/archive-auth-mirror/reprepro/conf'),
-             'static': Path('/srv/archive-auth-mirror/static'),
-             'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg'),
-             'basic-auth': Path('/srv/archive-auth-mirror/basic-auth')},
+             'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg')},
             paths)
 
 
@@ -69,8 +70,8 @@ class InstallResourcesTests(CharmTest):
 
     def setUp(self):
         super().setUp()
-        self.base_dir = self.useFixture(TempDir())
-        self.cron_dir = self.useFixture(TempDir())
+        self.root_dir = self.useFixture(TempDir())
+        os.makedirs(self.root_dir.join('etc/cron.d'))
 
         patcher_chown = mock.patch('os.chown')
         patcher_chown.start()
@@ -87,32 +88,29 @@ class InstallResourcesTests(CharmTest):
 
     def test_tree(self):
         """The install_resources function creates the filesystem structure."""
-        install_resources(
-            base_dir=self.base_dir.path, cron_dir=Path(self.cron_dir.path))
+        install_resources(root_dir=Path(self.root_dir.path))
         self.assertThat(
-            self.base_dir.path,
+            self.root_dir.join('srv/archive-auth-mirror'),
             DirContains(['basic-auth', 'bin', 'static', 'reprepro']))
 
     def test_resources(self):
         """Resources from the charm are copied to the service tree."""
-        install_resources(
-            base_dir=self.base_dir.path, cron_dir=Path(self.cron_dir.path))
+        install_resources(root_dir=Path(self.root_dir.path))
         self.assertThat(
-            self.base_dir.join('bin/mirror-archive'),
+            self.root_dir.join('srv/archive-auth-mirror/bin/mirror-archive'),
             FileContains(matcher=Contains("reprepro")))
         self.assertThat(
-            self.base_dir.join('bin/manage-user'),
+            self.root_dir.join('srv/archive-auth-mirror/bin/manage-user'),
             FileContains(matcher=Contains("htpasswd")))
         script_path = '/srv/archive-auth-mirror/bin/mirror-archive'
         self.assertThat(
-            self.cron_dir.join('archive-auth-mirror'),
+            self.root_dir.join('etc/cron.d/archive-auth-mirror'),
             FileContains(matcher=Contains(script_path)))
-        self.assertEqual(
-            0o100640, os.stat(self.base_dir.join('basic-auth')).st_mode)
+        auth_file = self.root_dir.join('srv/archive-auth-mirror/basic-auth')
+        self.assertEqual(0o100640, os.stat(auth_file).st_mode)
 
     def test_basic_auth_file_owner(self):
         """The basic-auth file is group-owned by www-data."""
-        install_resources(
-            base_dir=self.base_dir.path, cron_dir=Path(self.cron_dir.path))
+        install_resources(root_dir=Path(self.root_dir.path))
         # the file ownership is changed to the gid for www-data
         self.mock_fchown.assert_called_with(mock.ANY, 0, 123)
