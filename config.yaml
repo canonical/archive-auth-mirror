@@ -14,7 +14,7 @@ options:
   mirror-archs:
     type: string
     description: "A space-separated list of architectures to mirror."
-    default: "sources i386 amd64"
+    default: "source i386 amd64"
   mirror-gpg-key:
     type: string
     description: "GPG key for the repository to mirror."
