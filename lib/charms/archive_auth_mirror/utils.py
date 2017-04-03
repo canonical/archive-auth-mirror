@@ -6,6 +6,13 @@ from charmhelpers.core import hookenv
 from charmhelpers.core import host
 
 
+REQUIRED_OPTIONS = frozenset(
+    ['mirror-uri', 'mirror-archs', 'mirror-gpg-key', 'sign-gpg-key'])
+
+
+SCRIPTS = ('mirror-archive', 'manage-user', 'reprepro-sign-helper')
+
+
 def get_paths(root_dir=None):
     """Return path for the service tree.
 
@@ -19,6 +26,7 @@ def get_paths(root_dir=None):
     ├── reprepro
     │   └── conf  -- reprepro configuration files
     │       └── .gnupg  -- GPG config for reprepro
+    ├── sign-passphrase  -- contains the passphrase for the GPG sign key
     └── static  -- the root of the virtualhost, contains the repository
     """
     if root_dir is None:
@@ -32,6 +40,7 @@ def get_paths(root_dir=None):
         'config': base_dir / 'config',
         'static': base_dir / 'static',
         'basic-auth': base_dir / 'basic-auth',
+        'sign-passphrase': base_dir / 'sign-passphrase',
         'reprepro': reprepro_dir,
         'reprepro-conf': reprepro_dir / 'conf',
         'gnupghome': reprepro_dir / '.gnupg'}
@@ -66,10 +75,18 @@ def install_resources(root_dir=None):
     # run as root, but it must be readable by the web server
     host.write_file(
         str(paths['basic-auth']), b'', group='www-data', perms=0o640)
+    # create an empty sign passphrase file, only readable by root
+    host.write_file(str(paths['sign-passphrase']), b'', perms=0o600)
 
     # copy scripts
-    for resource in ('mirror-archive', 'manage-user'):
+    for resource in SCRIPTS:
         resource_path = os.path.join('resources', resource)
         shutil.copy(resource_path, str(paths['bin']))
     # install crontab
     shutil.copy('resources/crontab', str(paths['cron']))
+
+
+def have_required_config(config):
+    """Return whether all required config options are set."""
+    return all(
+        config.get(option) not in ('', None) for option in REQUIRED_OPTIONS)

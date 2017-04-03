@@ -23,3 +23,7 @@ options:
     type: string
     description: "GPG key for signing the archive."
     default: ""
+  sign-gpg-passphrase:
+    type: string
+    description: "Passphrase for the sign-gpg-key."
+    default: ""
