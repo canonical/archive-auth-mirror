@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 
 from charmhelpers.core import hookenv, host
 
@@ -51,6 +52,8 @@ def install_resources(root_dir=None):
         shutil.copy(resource_path, str(paths['bin']))
     # install crontab
     shutil.copy('resources/crontab', str(paths['cron']))
+    # symlink the lib libary to make it available to scripts too
+    (paths['bin'] / 'lib').symlink_to(Path.cwd() / 'lib')
 
 
 def have_required_config(config):

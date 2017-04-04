@@ -10,7 +10,7 @@ def get_paths(root_dir=None):
     ├── basic-auth -- the file containing BasicAuth username/passwords
     ├── bin
     │   └── mirror-archive  -- the mirroring script
-    ├── config  -- the script configuration file
+    ├── config.yaml  -- the script configuration file
     ├── reprepro
     │   └── conf  -- reprepro configuration files
     │       └── .gnupg  -- GPG config for reprepro
@@ -25,7 +25,7 @@ def get_paths(root_dir=None):
         'base': base_dir,
         'cron': root_dir / 'etc/cron.d/archive-auth-mirror',
         'bin': base_dir / 'bin',
-        'config': base_dir / 'config',
+        'config': base_dir / 'config.yaml',
         'static': base_dir / 'static',
         'basic-auth': base_dir / 'basic-auth',
         'sign-passphrase': base_dir / 'sign-passphrase',

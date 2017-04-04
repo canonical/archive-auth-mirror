@@ -46,8 +46,8 @@ class ConfigureRepreproTest(CharmTest):
         self.assertEqual(
             textwrap.dedent(
                 '''\
-                SUITE=xenial
-                SIGN_KEY_ID=CDCDCDCD
+                suite: xenial
+                sign-key-id: 'CDCDCDCD'
                 '''),
             paths['config'].read_text())
 
