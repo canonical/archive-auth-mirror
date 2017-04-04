@@ -2,7 +2,7 @@ import getpass
 
 from charmhelpers.core.templating import render
 
-from .utils import get_paths
+from archive_auth_mirror.utils import get_paths
 
 
 def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,

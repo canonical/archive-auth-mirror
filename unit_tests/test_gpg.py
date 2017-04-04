@@ -1,6 +1,6 @@
 from charmtest import CharmTest
 
-from charms.archive_auth_mirror.gpg import import_gpg_keys
+from archive_auth_mirror.gpg import import_gpg_keys
 
 
 PUBLIC_KEY_FINGERPRINT = 'E275C4776E00A6BAED081A97DE2922ADDC4EDFF2'
