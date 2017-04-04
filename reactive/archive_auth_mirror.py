@@ -32,18 +32,19 @@ def config_mirror_uri_changed():
     configure_static_serve()
 
 
-@when(charm_state('installed'), 'config.set.mirror-uri',
-      'config.set.mirror-archs', 'config.set.mirror-gpg-key',
-      'config.set.sign-gpg-key')
+@when(charm_state('installed'), 'config.changed')
 def config_set():
     config = hookenv.config()
+    if not utils.have_required_config(config):
+        return
 
     # configure mirroring
     mirror_fprint, sign_fprint = gpg.import_gpg_keys(
         config['mirror-gpg-key'], config['sign-gpg-key'])
+    sign_gpg_passphrase = config.get('sign-gpg-passphrase', '').strip()
     reprepro.configure_reprepro(
-        config['mirror-uri'], config['mirror-archs'], mirror_fprint,
-        sign_fprint)
+        config['mirror-uri'].strip(), config['mirror-archs'].strip(),
+        mirror_fprint, sign_fprint, sign_gpg_passphrase)
     hookenv.status_set('active', 'Mirroring configured')
 
 

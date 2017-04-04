@@ -19,7 +19,8 @@ class ConfigureRepreproTest(CharmTest):
         paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
-            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', get_paths=lambda: paths)
+            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret',
+            get_paths=lambda: paths)
         self.assertEqual(
             textwrap.dedent(
                 '''\
@@ -27,9 +28,9 @@ class ConfigureRepreproTest(CharmTest):
                 Label: xenial archive
                 Components: main universe
                 Architectures: i386 amd64
-                SignWith: CDCDCDCD
+                SignWith: ! {}/reprepro-sign-helper
                 Update: update-repo
-                '''),
+                '''.format(paths['bin'])),
             (paths['reprepro-conf'] / 'distributions').read_text())
         self.assertEqual(
             textwrap.dedent(
@@ -43,7 +44,12 @@ class ConfigureRepreproTest(CharmTest):
                 '''),
             (paths['reprepro-conf'] / 'updates').read_text())
         self.assertEqual(
-            'SUITE=xenial\n', paths['config'].read_text())
+            textwrap.dedent(
+                '''\
+                SUITE=xenial
+                SIGN_KEY_ID=CDCDCDCD
+                '''),
+            paths['config'].read_text())
 
 
 class DisableMirroringTest(CharmTest):
@@ -53,7 +59,8 @@ class DisableMirroringTest(CharmTest):
         paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
-            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', get_paths=lambda: paths)
+            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret',
+            get_paths=lambda: paths)
 
         config = paths['config']
         self.assertTrue(config.exists())

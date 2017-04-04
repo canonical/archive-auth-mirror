@@ -17,6 +17,7 @@ from charms.archive_auth_mirror.utils import (
     get_virtualhost_name,
     get_virtualhost_config,
     install_resources,
+    have_required_config,
 )
 
 from fakes import FakeHookEnv
@@ -34,6 +35,8 @@ class GetPathsTest(TestCase):
              'config': Path('/srv/archive-auth-mirror/config'),
              'static': Path('/srv/archive-auth-mirror/static'),
              'basic-auth': Path('/srv/archive-auth-mirror/basic-auth'),
+             'sign-passphrase': Path(
+                 '/srv/archive-auth-mirror/sign-passphrase'),
              'reprepro': Path('/srv/archive-auth-mirror/reprepro'),
              'reprepro-conf': Path('/srv/archive-auth-mirror/reprepro/conf'),
              'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg')},
@@ -89,9 +92,9 @@ class InstallResourcesTests(CharmTest):
     def test_tree(self):
         """The install_resources function creates the filesystem structure."""
         install_resources(root_dir=Path(self.root_dir.path))
+        paths = ['basic-auth', 'bin', 'static', 'reprepro', 'sign-passphrase']
         self.assertThat(
-            self.root_dir.join('srv/archive-auth-mirror'),
-            DirContains(['basic-auth', 'bin', 'static', 'reprepro']))
+            self.root_dir.join('srv/archive-auth-mirror'), DirContains(paths))
 
     def test_resources(self):
         """Resources from the charm are copied to the service tree."""
@@ -102,6 +105,10 @@ class InstallResourcesTests(CharmTest):
         self.assertThat(
             self.root_dir.join('srv/archive-auth-mirror/bin/manage-user'),
             FileContains(matcher=Contains("htpasswd")))
+        sign_script_path = 'srv/archive-auth-mirror/bin/reprepro-sign-helper'
+        self.assertThat(
+            self.root_dir.join(sign_script_path),
+            FileContains(matcher=Contains("gpg")))
         script_path = '/srv/archive-auth-mirror/bin/mirror-archive'
         self.assertThat(
             self.root_dir.join('etc/cron.d/archive-auth-mirror'),
@@ -114,3 +121,42 @@ class InstallResourcesTests(CharmTest):
         install_resources(root_dir=Path(self.root_dir.path))
         # the file ownership is changed to the gid for www-data
         self.mock_fchown.assert_called_with(mock.ANY, 0, 123)
+
+
+class HaveRequiredConfigsTest(TestCase):
+
+    def test_all_options(self):
+        """If all required options are set, the function returns True."""
+        config = {
+            'mirror-uri': 'http://example.com/ubuntu precise main',
+            'mirror-archs': 'amd64 i386',
+            'mirror-gpg-key': 'aabbcc',
+            'sign-gpg-key': 'ddeeff'}
+        self.assertTrue(have_required_config(config))
+
+    def test_option_not_present(self):
+        """If an option is not present, the function returns False."""
+        # no mirror-gpg-key
+        config = {
+            'mirror-uri': 'http://example.com/ubuntu precise main',
+            'mirror-archs': 'amd64 i386',
+            'sign-gpg-key': 'ddeeff'}
+        self.assertFalse(have_required_config(config))
+
+    def test_option_none(self):
+        """If an option has a None value, the function returns False."""
+        config = {
+            'mirror-uri': 'http://example.com/ubuntu precise main',
+            'mirror-archs': None,
+            'mirror-gpg-key': 'aabbcc',
+            'sign-gpg-key': 'ddeeff'}
+        self.assertFalse(have_required_config(config))
+
+    def test_option_empty_string(self):
+        """If an option is an empty string, the function returns False."""
+        config = {
+            'mirror-uri': 'http://example.com/ubuntu precise main',
+            'mirror-archs': 'amd64 i386',
+            'mirror-gpg-key': '',
+            'sign-gpg-key': 'ddeeff'}
+        self.assertFalse(have_required_config(config))

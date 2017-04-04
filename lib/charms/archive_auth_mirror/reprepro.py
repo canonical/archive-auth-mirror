@@ -6,14 +6,17 @@ from .utils import get_paths
 
 
 def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,
-                       sign_key_fingerprint, get_paths=get_paths):
+                       sign_key_fingerprint, sign_key_passphrase,
+                       get_paths=get_paths):
     """Create reprepro configuration files."""
     paths = get_paths()
     context = split_repository_uri(mirror_uri)
     context.update(
         {'archs': mirror_archs,
          'mirror_key': mirror_key_fingerprint,
-         'sign_key': sign_key_fingerprint})
+         'sign_key': sign_key_fingerprint,
+         'sign_script': paths['bin'] / 'reprepro-sign-helper'})
+
     # explicitly pass owner and group for tests, otherwise root would be used
     owner = group = getpass.getuser()
     render(
@@ -25,6 +28,9 @@ def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,
         context, owner=owner, group=group)
     render(
         'config.j2', str(paths['config']), context, owner=owner, group=group)
+    # save the sign passphrase for the signing helper script
+    with paths['sign-passphrase'].open('w') as fh:
+        fh.write(sign_key_passphrase)
 
 
 def disable_mirroring(get_paths=get_paths):
