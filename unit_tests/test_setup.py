@@ -53,7 +53,6 @@ class InstallResourcesTests(CharmTest):
     def setUp(self):
         super().setUp()
         self.root_dir = self.useFixture(TempDir())
-        os.makedirs(self.root_dir.join('etc/cron.d'))
 
         patcher_chown = mock.patch('os.chown')
         patcher_chown.start()
@@ -88,10 +87,6 @@ class InstallResourcesTests(CharmTest):
         self.assertThat(
             self.root_dir.join(sign_script_path),
             FileContains(matcher=Contains("import reprepro_sign_helper")))
-        script_path = '/srv/archive-auth-mirror/bin/mirror-archive'
-        self.assertThat(
-            self.root_dir.join('etc/cron.d/archive-auth-mirror'),
-            FileContains(matcher=Contains(script_path)))
         auth_file = self.root_dir.join('srv/archive-auth-mirror/basic-auth')
         self.assertEqual(0o100640, os.stat(auth_file).st_mode)
 
