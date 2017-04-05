@@ -3,7 +3,9 @@ from charmhelpers.core import hookenv
 from charms.reactive import when, when_not, set_state
 
 from charms.layer.nginx import configure_site
-from charms.archive_auth_mirror import gpg, reprepro, utils
+
+from charms.archive_auth_mirror import reprepro, setup
+from archive_auth_mirror import gpg
 
 
 def charm_state(state):
@@ -13,7 +15,7 @@ def charm_state(state):
 
 @when_not(charm_state('installed'))
 def install():
-    utils.install_resources()
+    setup.install_resources()
     set_state(charm_state('installed'))
 
 
@@ -35,7 +37,7 @@ def config_mirror_uri_changed():
 @when(charm_state('installed'), 'config.changed')
 def config_set():
     config = hookenv.config()
-    if not utils.have_required_config(config):
+    if not setup.have_required_config(config):
         return
 
     # configure mirroring
@@ -58,6 +60,6 @@ def config_not_set():
 
 def configure_static_serve():
     """Configure the static file serve."""
-    vhost_config = utils.get_virtualhost_config()
+    vhost_config = setup.get_virtualhost_config()
     configure_site(
         'archive-auth-mirror', 'nginx-static.j2', **vhost_config)

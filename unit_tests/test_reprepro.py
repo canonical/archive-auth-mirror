@@ -4,7 +4,7 @@ from pathlib import Path
 
 from charmtest import CharmTest
 
-from charms.archive_auth_mirror.utils import get_paths
+from archive_auth_mirror.utils import get_paths
 from charms.archive_auth_mirror.reprepro import (
     configure_reprepro,
     disable_mirroring,
