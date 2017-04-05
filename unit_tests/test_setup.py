@@ -80,14 +80,14 @@ class InstallResourcesTests(CharmTest):
         install_resources(root_dir=Path(self.root_dir.path))
         self.assertThat(
             self.root_dir.join('srv/archive-auth-mirror/bin/mirror-archive'),
-            FileContains(matcher=Contains("reprepro")))
+            FileContains(matcher=Contains("import mirror_archive")))
         self.assertThat(
             self.root_dir.join('srv/archive-auth-mirror/bin/manage-user'),
             FileContains(matcher=Contains("htpasswd")))
         sign_script_path = 'srv/archive-auth-mirror/bin/reprepro-sign-helper'
         self.assertThat(
             self.root_dir.join(sign_script_path),
-            FileContains(matcher=Contains("gpg")))
+            FileContains(matcher=Contains("import reprepro_sign_helper")))
         script_path = '/srv/archive-auth-mirror/bin/mirror-archive'
         self.assertThat(
             self.root_dir.join('etc/cron.d/archive-auth-mirror'),
