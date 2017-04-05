@@ -83,7 +83,7 @@ class InstallResourcesTests(CharmTest):
             FileContains(matcher=Contains("import mirror_archive")))
         self.assertThat(
             self.root_dir.join('srv/archive-auth-mirror/bin/manage-user'),
-            FileContains(matcher=Contains("htpasswd")))
+            FileContains(matcher=Contains("import manage_user")))
         sign_script_path = 'srv/archive-auth-mirror/bin/reprepro-sign-helper'
         self.assertThat(
             self.root_dir.join(sign_script_path),
