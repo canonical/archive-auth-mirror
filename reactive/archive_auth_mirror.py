@@ -1,9 +1,9 @@
 from charmhelpers.core import hookenv
 
-from charms.reactive import when, when_not, set_state
+from charms.reactive import when, when_not, set_state, only_once
 
 from charms.layer.nginx import configure_site
-from charms.archive_auth_mirror import gpg, reprepro, utils
+from charms.archive_auth_mirror import gpg, reprepro, utils, ssh
 
 
 def charm_state(state):
@@ -15,6 +15,13 @@ def charm_state(state):
 def install():
     utils.install_resources()
     set_state(charm_state('installed'))
+
+
+@when(charm_state('installed'))
+@only_once
+def create_ssh_key():
+    utils.install_resources()
+    ssh.create_key()
 
 
 @when(charm_state('installed'), 'nginx.available')

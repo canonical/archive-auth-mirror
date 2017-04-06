@@ -41,6 +41,7 @@ def get_paths(root_dir=None):
         'static': base_dir / 'static',
         'basic-auth': base_dir / 'basic-auth',
         'sign-passphrase': base_dir / 'sign-passphrase',
+        'ssh-key': base_dir / 'ssh-key',
         'reprepro': reprepro_dir,
         'reprepro-conf': reprepro_dir / 'conf',
         'gnupghome': reprepro_dir / '.gnupg'}
