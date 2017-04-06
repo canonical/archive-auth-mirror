@@ -1,40 +1,12 @@
 #!/usr/bin/env python3
 
 import sys
-import subprocess
 import argparse
+from pathlib import Path
 
 from ..utils import get_paths
-from ..script import (
-    setup_logger,
-    get_config,
-)
-
-
-def gpg(args, sign_key_id, paths=None):
-    """Call gpg with the specified args."""
-    if paths is None:
-        paths = get_paths()
-    command = [
-        'gpg', '--no-use-agent', '--batch',
-        '--passphrase-file', str(paths['sign-passphrase']),
-        '--homedir', str(paths['gnupghome']), '-u', sign_key_id]
-    command.extend(args)
-    subprocess.check_call(command)
-
-
-def inline_sign(unsigned_file, inline_sign_file, sign_key_id):
-    """Create an inline-signed file."""
-    gpg(
-        ['-o', inline_sign_file, '--clearsign', '-a', unsigned_file],
-        sign_key_id)
-
-
-def detach_sign(unsigned_file, detach_sign_file, sign_key_id):
-    """Create a detached signature for a file."""
-    gpg(
-        ['-o', detach_sign_file, '--detach-sig', '-a', unsigned_file],
-        sign_key_id)
+from ..gpg import inline_sign, detach_sign
+from ..script import setup_logger, get_config
 
 
 def parse_args(args=None):
@@ -56,10 +28,11 @@ def main():
     if not config:
         logger.error('no config file found')
         sys.exit(1)
+    sign_key = config['sign-key-id']
+
     args = parse_args()
+    unsigned_file = Path(args.unsigned_file)
     if args.inline_sign_file:
-        inline_sign(
-            args.unsigned_file, args.inline_sign_file, config['sign-key-id'])
+        inline_sign(sign_key, unsigned_file, Path(args.inline_sign_file))
     if args.detach_sign_file:
-        detach_sign(
-            args.unsigned_file, args.detach_sign_file, config['sign-key-id'])
+        detach_sign(sign_key, unsigned_file, Path(args.detach_sign_file))
