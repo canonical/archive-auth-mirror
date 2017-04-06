@@ -1,11 +1,11 @@
 from charmhelpers.core import hookenv
 
-from charms.reactive import when, when_not, set_state
+from charms.reactive import when, when_not, set_state, remove_state
 
 from charms.layer.nginx import configure_site
 
 from charms.archive_auth_mirror import reprepro, setup
-from archive_auth_mirror import gpg
+from archive_auth_mirror import gpg, cron
 
 
 def charm_state(state):
@@ -21,7 +21,7 @@ def install():
 
 @when(charm_state('installed'), 'nginx.available')
 def configure_webapp():
-    configure_static_serve()
+    _configure_static_serve()
 
 
 @when(charm_state('installed'), 'nginx.available', 'website.available')
@@ -31,7 +31,7 @@ def configure_website(website):
 
 @when(charm_state('installed'), 'config.changed.mirror-uri')
 def config_mirror_uri_changed():
-    configure_static_serve()
+    _configure_static_serve()
 
 
 @when(charm_state('installed'), 'config.changed')
@@ -58,7 +58,21 @@ def config_not_set():
         'blocked', 'Not all required configs set, mirroring is disabled')
 
 
-def configure_static_serve():
+@when_not(charm_state('job.enabled'))
+@when('leadership.is_leader')
+def install_cron():
+    cron.install_crontab()
+    set_state(charm_state('job.enabled'))
+
+
+@when_not('leadership.is_leader')
+@when(charm_state('job.enabled'))
+def remove_cron():
+    cron.remove_crontab()
+    remove_state(charm_state('job.enabled'))
+
+
+def _configure_static_serve():
     """Configure the static file serve."""
     vhost_config = setup.get_virtualhost_config()
     configure_site(
