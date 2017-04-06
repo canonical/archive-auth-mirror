@@ -1,6 +1,6 @@
 from charmhelpers.core import hookenv
 
-from charms.reactive import when, when_not, set_state
+from charms.reactive import when, when_not, set_state, remove_state
 
 from charms.layer.nginx import configure_site
 
@@ -58,14 +58,18 @@ def config_not_set():
         'blocked', 'Not all required configs set, mirroring is disabled')
 
 
+@when_not(charm_state('job.enabled'))
 @when('leadership.is_leader')
 def install_cron():
     cron.install_crontab()
+    set_state(charm_state('job.enabled'))
 
 
 @when_not('leadership.is_leader')
+@when(charm_state('job.enabled'))
 def remove_cron():
     cron.remove_crontab()
+    remove_state(charm_state('job.enabled'))
 
 
 def _configure_static_serve():

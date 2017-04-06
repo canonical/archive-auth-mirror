@@ -36,7 +36,7 @@ class RemoveCrontabTest(TestWithFixtures):
         remove_crontab(paths=self.paths)
         self.assertFalse(self.paths['cron'].exists())
 
-    def test_remove_crontab_not_existet(self):
+    def test_remove_crontab_not_existent(self):
         """If the crontab file doesn't exist, remove_crontab no-ops."""
         self.assertFalse(self.paths['cron'].exists())
         remove_crontab(paths=self.paths)
