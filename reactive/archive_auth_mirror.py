@@ -20,7 +20,6 @@ def install():
 @when(charm_state('installed'))
 @only_once
 def create_ssh_key():
-    utils.install_resources()
     ssh.create_key()
 
 
@@ -32,6 +31,17 @@ def configure_webapp():
 @when(charm_state('installed'), 'nginx.available', 'website.available')
 def configure_website(website):
     website.configure(port=hookenv.config()['port'])
+
+
+@when('ssh-keys.connected')
+def set_ssh_key(ssh_keys):
+    ssh_keys.set_public_key(ssh.get_public_key())
+
+
+@when('ssh-keys.authorized_key')
+def add_authorized_key(ssh_keys):
+    hookenv.log("Adding key: " + ssh_keys.get_authorized_key())
+    ssh.add_authorized_key(ssh_keys.get_authorized_key())
 
 
 @when(charm_state('installed'), 'config.changed.mirror-uri')

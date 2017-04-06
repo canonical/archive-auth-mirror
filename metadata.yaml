@@ -7,3 +7,8 @@ series:
   - xenial
 tags:
   - security
+
+peers:
+    ssh-keys:
+        interface: ssh-keys
+        scope: global

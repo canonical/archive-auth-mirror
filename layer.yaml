@@ -2,6 +2,7 @@ includes:
   - 'layer:basic'
   - 'layer:nginx'
   - 'layer:nagios'
+  - 'interface:ssh-keys'
 repo: https://github.com/CanonicalLtd/archive-auth-mirror
 options:
   basic:

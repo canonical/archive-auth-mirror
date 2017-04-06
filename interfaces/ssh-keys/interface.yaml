@@ -1,0 +1,3 @@
+name: ssh-keys
+summary: A peer interface for exchanging ssh keys among units.
+version: 1
