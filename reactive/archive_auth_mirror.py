@@ -4,7 +4,7 @@ from charms.reactive import when, when_not, set_state, remove_state
 
 from charms.layer.nginx import configure_site
 
-from charms.archive_auth_mirror import reprepro, setup
+from charms.archive_auth_mirror import repository, setup
 from archive_auth_mirror import gpg, cron
 
 
@@ -44,7 +44,7 @@ def config_set():
     mirror_fprint, sign_fprint = gpg.import_gpg_keys(
         config['mirror-gpg-key'], config['sign-gpg-key'])
     sign_gpg_passphrase = config.get('sign-gpg-passphrase', '').strip()
-    reprepro.configure_reprepro(
+    repository.configure_reprepro(
         config['mirror-uri'].strip(), config['mirror-archs'].strip(),
         mirror_fprint, sign_fprint, sign_gpg_passphrase)
     hookenv.status_set('active', 'Mirroring configured')
@@ -53,7 +53,7 @@ def config_set():
 @when_not('config.set.mirror-uri', 'config.set.mirror-archs',
           'config.set.mirror-gpg-key', 'config.set.sign-gpg-key')
 def config_not_set():
-    reprepro.disable_mirroring()
+    repository.disable_mirroring()
     hookenv.status_set(
         'blocked', 'Not all required configs set, mirroring is disabled')
 
