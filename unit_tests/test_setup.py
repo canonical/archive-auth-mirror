@@ -60,11 +60,17 @@ class InstallResourcesTests(CharmTest):
 
         patcher_pwnam = mock.patch('pwd.getpwnam')
         mock_pwnam = patcher_pwnam.start()
-        mock_pwnam.return_value = mock.MagicMock(pw_uid=456)
+        mock_pwnam.return_value.pw_uid = 0
+        self.addCleanup(patcher_pwnam.stop)
 
         patcher_grnam = mock.patch('grp.getgrnam')
         mock_grnam = patcher_grnam.start()
-        mock_grnam.return_value = mock.MagicMock(gr_gid=123)
+
+        def getgrnam(group):
+            gr_gid = 123 if group == 'www-data' else 0
+            return mock.MagicMock(gr_gid=gr_gid)
+
+        mock_grnam.side_effect = getgrnam
         self.addCleanup(patcher_grnam.stop)
 
         patcher_fchown = mock.patch('os.fchown')
@@ -98,7 +104,7 @@ class InstallResourcesTests(CharmTest):
         """The basic-auth file is group-owned by www-data."""
         install_resources(root_dir=Path(self.root_dir.path))
         # the file ownership is changed to the gid for www-data
-        self.mock_fchown.assert_called_with(mock.ANY, 456, 123)
+        self.mock_fchown.assert_any_call(mock.ANY, 0, 123)
 
 
 class CreateScriptFileTest(CharmTest):

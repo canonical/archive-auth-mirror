@@ -1,4 +1,3 @@
-import getpass
 from pathlib import Path
 
 from charmhelpers.core import hookenv, host
@@ -59,10 +58,8 @@ def create_script_file(name, bindir):
         'interpreter': Path.cwd().parent / '.venv/bin/python3',
         'script_module': name.replace('-', '_')}
     # explicitly pass owner and group for tests, otherwise root would be used
-    owner = group = getpass.getuser()
     render(
-        'script.j2', str(bindir / name), context, owner=owner, group=group,
-        perms=0o755)
+        'script.j2', str(bindir / name), context, perms=0o755)
 
 
 def have_required_config(config):
