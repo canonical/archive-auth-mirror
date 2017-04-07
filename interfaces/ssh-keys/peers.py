@@ -10,7 +10,12 @@ class SshKeysPeers(RelationBase):
 
     class states(bus.StateList):
         connected = bus.State('{relation_name}.connected')
+        has_public_key = bus.State('{relation_name}.has_public_key')
         authorized_key = bus.State('{relation_name}.authorized_key')
+
+    @hook('{peers:ssh-keys}-relation-{joined}')
+    def joined(self):
+        self.set_state(self.states.connected)
 
     @hook('{peers:ssh-keys}-relation-{changed,joined}')
     def changed(self):
@@ -26,8 +31,6 @@ class SshKeysPeers(RelationBase):
                 self.set_state(self.states.authorized_key)
             else:
                 hookenv.log("Public key is still the same")
-        hookenv.log(repr(self.get_authorized_key()))
-        self.set_state(self.states.connected)
 
     @hook('{peers:ssh-keys}-relation-{departed}')
     def departed(self):
@@ -37,7 +40,11 @@ class SshKeysPeers(RelationBase):
 
     def set_public_key(self, public_key):
         relation_info = {'public-ssh-key': public_key}
+        self.set_state(self.states.has_public_key)
         self.set_remote(**relation_info)
 
     def get_authorized_key(self):
         return self.get_local('authorized-key')
+
+    def authorzied_key_added(self):
+        self.remove_state(self.states.authorized_key)

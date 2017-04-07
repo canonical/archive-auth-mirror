@@ -33,6 +33,7 @@ def configure_website(website):
     website.configure(port=hookenv.config()['port'])
 
 
+@when_not('ssh-keys.has_public_key')
 @when('ssh-keys.connected')
 def set_ssh_key(ssh_keys):
     ssh_keys.set_public_key(ssh.get_public_key())
@@ -42,6 +43,7 @@ def set_ssh_key(ssh_keys):
 def add_authorized_key(ssh_keys):
     hookenv.log("Adding key: " + ssh_keys.get_authorized_key())
     ssh.add_authorized_key(ssh_keys.get_authorized_key())
+    ssh_keys.authorzied_key_added()
 
 
 @when(charm_state('installed'), 'config.changed.mirror-uri')
