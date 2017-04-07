@@ -1,3 +1,5 @@
+"""Common setup functions for scripts."""
+
 import os
 import sys
 import logging
@@ -6,14 +8,18 @@ from logging.handlers import SysLogHandler
 import yaml
 
 
-def setup_logger(name=None):
-    """Setup and return the logger for the script."""
-    if not name:
-        name = os.path.basename(sys.argv[0])
+def setup_logger(level=logging.DEBUG, echo=False):
+    """Setup and return the logger for the script.
 
+    If echo is True, logging is also written to stderr.
+    """
+    name = os.path.basename(sys.argv[0])
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(SysLogHandler())
+    logger.setLevel(level)
+    logger.addHandler(
+        SysLogHandler(address='/dev/log', facility=SysLogHandler.LOG_DAEMON))
+    if echo:
+        logger.addHandler(logging.StreamHandler())
     return logger
 
 
