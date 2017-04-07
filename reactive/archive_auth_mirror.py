@@ -20,16 +20,21 @@ def install():
 
 
 @when(charm_state('installed'), 'nginx.available')
-def configure_webapp():
+@when_not(charm_state('static-serve.configured'))
+def configure_static_service():
     _configure_static_serve()
+    set_state(charm_state('static-serve.configured'))
 
 
-@when(charm_state('installed'), 'nginx.available', 'website.available')
+@when(charm_state('installed'))
+@when('nginx.available', 'website.available')
+@when_not(charm_state('website.configured'))
 def configure_website(website):
     website.configure(port=hookenv.config()['port'])
+    set_state(charm_state('website.configured'))
 
 
-@when(charm_state('installed'), 'config.changed.mirror-uri')
+@when(charm_state('static-serve.configured'), 'config.changed.mirror-uri')
 def config_mirror_uri_changed():
     _configure_static_serve()
 
