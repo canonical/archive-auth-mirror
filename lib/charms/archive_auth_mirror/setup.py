@@ -30,7 +30,7 @@ def get_virtualhost_config(hookenv=hookenv):
 
 
 def install_resources(root_dir=None):
-    """Create tree structure and copy resources from the charm."""
+    """Create tree structure and install resources from the charm."""
     paths = get_paths(root_dir=root_dir)
     for name in ('bin', 'reprepro-conf', 'static'):
         host.mkdir(str(paths[name]), perms=0o755)
