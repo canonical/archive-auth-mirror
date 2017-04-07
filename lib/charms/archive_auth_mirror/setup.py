@@ -57,9 +57,7 @@ def create_script_file(name, bindir):
     context = {
         'interpreter': Path.cwd().parent / '.venv/bin/python3',
         'script_module': name.replace('-', '_')}
-    # explicitly pass owner and group for tests, otherwise root would be used
-    render(
-        'script.j2', str(bindir / name), context, perms=0o755)
+    render('script.j2', str(bindir / name), context, perms=0o755)
 
 
 def have_required_config(config):
