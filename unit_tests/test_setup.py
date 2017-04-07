@@ -2,8 +2,6 @@ from unittest import TestCase, mock
 import os
 from pathlib import Path
 
-from fixtures import TempDir
-
 from testtools.matchers import (
     FileContains,
     DirContains,
@@ -16,6 +14,7 @@ from charms.archive_auth_mirror.setup import (
     get_virtualhost_name,
     get_virtualhost_config,
     install_resources,
+    create_script_file,
     have_required_config,
 )
 
@@ -52,15 +51,26 @@ class InstallResourcesTests(CharmTest):
 
     def setUp(self):
         super().setUp()
-        self.root_dir = self.useFixture(TempDir())
+        self.root_dir = self.fakes.fs.root
+        os.makedirs(self.root_dir.join('etc/cron.d'))
 
         patcher_chown = mock.patch('os.chown')
         patcher_chown.start()
         self.addCleanup(patcher_chown.stop)
 
+        patcher_pwnam = mock.patch('pwd.getpwnam')
+        mock_pwnam = patcher_pwnam.start()
+        mock_pwnam.return_value.pw_uid = 0
+        self.addCleanup(patcher_pwnam.stop)
+
         patcher_grnam = mock.patch('grp.getgrnam')
         mock_grnam = patcher_grnam.start()
-        mock_grnam.return_value = mock.MagicMock(gr_gid=123)
+
+        def getgrnam(group):
+            gr_gid = 123 if group == 'www-data' else 0
+            return mock.MagicMock(gr_gid=gr_gid)
+
+        mock_grnam.side_effect = getgrnam
         self.addCleanup(patcher_grnam.stop)
 
         patcher_fchown = mock.patch('os.fchown')
@@ -94,7 +104,23 @@ class InstallResourcesTests(CharmTest):
         """The basic-auth file is group-owned by www-data."""
         install_resources(root_dir=Path(self.root_dir.path))
         # the file ownership is changed to the gid for www-data
-        self.mock_fchown.assert_called_with(mock.ANY, 0, 123)
+        self.mock_fchown.assert_any_call(mock.ANY, 0, 123)
+
+
+class CreateScriptFileTest(CharmTest):
+
+    def test_crate_script_file(self):
+        """create_script_file renders a python script file."""
+        bindir = Path(self.fakes.fs.root.path)
+        create_script_file('foo', bindir)
+        script = bindir / 'foo'
+        content = script.read_text()
+
+        shebang = '#!{}/.venv/bin/python3\n'.format(Path.cwd().parent)
+        self.assertTrue(content.startswith(shebang))
+        self.assertIn('from archive_auth_mirror.scripts import foo', content)
+        self.assertIn('foo.main()', content)
+        self.assertEqual(0o100755, script.stat().st_mode)
 
 
 class HaveRequiredConfigsTest(TestCase):

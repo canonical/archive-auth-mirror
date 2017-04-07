@@ -1,8 +1,7 @@
-import os
-import shutil
 from pathlib import Path
 
 from charmhelpers.core import hookenv, host
+from charmhelpers.core.templating import render
 
 from archive_auth_mirror.utils import get_paths
 
@@ -46,12 +45,19 @@ def install_resources(root_dir=None):
     # create an empty sign passphrase file, only readable by root
     host.write_file(str(paths['sign-passphrase']), b'', perms=0o600)
 
-    # copy scripts
-    for resource in SCRIPTS:
-        resource_path = os.path.join('resources', resource)
-        shutil.copy(resource_path, str(paths['bin']))
+    # install scripts
+    for script in SCRIPTS:
+        create_script_file(script, paths['bin'])
     # symlink the lib libary to make it available to scripts too
     (paths['bin'] / 'lib').symlink_to(Path.cwd() / 'lib')
+
+
+def create_script_file(name, bindir):
+    """Write a python script file from the template."""
+    context = {
+        'interpreter': Path.cwd().parent / '.venv/bin/python3',
+        'script_module': name.replace('-', '_')}
+    render('script.j2', str(bindir / name), context, perms=0o755)
 
 
 def have_required_config(config):

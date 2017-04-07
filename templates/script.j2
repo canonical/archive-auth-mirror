@@ -1,0 +1,11 @@
+#!{{ interpreter }}
+
+import sys
+from os import path
+
+sys.path.append(path.join(path.dirname(__file__), 'lib'))
+
+from archive_auth_mirror.scripts import {{ script_module }}
+
+{{ script_module }}.main()
+
