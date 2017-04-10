@@ -1,9 +1,11 @@
 from charmhelpers.core import hookenv
 
-from charms.reactive import when, when_not, set_state, only_once
+from charms.reactive import when, when_not, set_state, remove_state, only_once
 
 from charms.layer.nginx import configure_site
-from charms.archive_auth_mirror import gpg, reprepro, utils, ssh
+
+from charms.archive_auth_mirror import repository, setup
+from archive_auth_mirror import gpg, cron, ssh
 
 
 def charm_state(state):
@@ -13,7 +15,7 @@ def charm_state(state):
 
 @when_not(charm_state('installed'))
 def install():
-    utils.install_resources()
+    setup.install_resources()
     set_state(charm_state('installed'))
 
 
@@ -25,7 +27,7 @@ def create_ssh_key():
 
 @when(charm_state('installed'), 'nginx.available')
 def configure_webapp():
-    configure_static_serve()
+    _configure_static_serve()
 
 
 @when(charm_state('installed'), 'nginx.available', 'website.available')
@@ -48,20 +50,20 @@ def add_authorized_key(ssh_keys):
 
 @when(charm_state('installed'), 'config.changed.mirror-uri')
 def config_mirror_uri_changed():
-    configure_static_serve()
+    _configure_static_serve()
 
 
 @when(charm_state('installed'), 'config.changed')
 def config_set():
     config = hookenv.config()
-    if not utils.have_required_config(config):
+    if not setup.have_required_config(config):
         return
 
     # configure mirroring
     mirror_fprint, sign_fprint = gpg.import_gpg_keys(
         config['mirror-gpg-key'], config['sign-gpg-key'])
     sign_gpg_passphrase = config.get('sign-gpg-passphrase', '').strip()
-    reprepro.configure_reprepro(
+    repository.configure_reprepro(
         config['mirror-uri'].strip(), config['mirror-archs'].strip(),
         mirror_fprint, sign_fprint, sign_gpg_passphrase)
     hookenv.status_set('active', 'Mirroring configured')
@@ -70,13 +72,27 @@ def config_set():
 @when_not('config.set.mirror-uri', 'config.set.mirror-archs',
           'config.set.mirror-gpg-key', 'config.set.sign-gpg-key')
 def config_not_set():
-    reprepro.disable_mirroring()
+    repository.disable_mirroring()
     hookenv.status_set(
         'blocked', 'Not all required configs set, mirroring is disabled')
 
 
-def configure_static_serve():
+@when_not(charm_state('job.enabled'))
+@when('leadership.is_leader')
+def install_cron():
+    cron.install_crontab()
+    set_state(charm_state('job.enabled'))
+
+
+@when_not('leadership.is_leader')
+@when(charm_state('job.enabled'))
+def remove_cron():
+    cron.remove_crontab()
+    remove_state(charm_state('job.enabled'))
+
+
+def _configure_static_serve():
     """Configure the static file serve."""
-    vhost_config = utils.get_virtualhost_config()
+    vhost_config = setup.get_virtualhost_config()
     configure_site(
         'archive-auth-mirror', 'nginx-static.j2', **vhost_config)

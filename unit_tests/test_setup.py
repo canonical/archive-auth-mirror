@@ -2,8 +2,6 @@ from unittest import TestCase, mock
 import os
 from pathlib import Path
 
-from fixtures import TempDir
-
 from testtools.matchers import (
     FileContains,
     DirContains,
@@ -12,35 +10,15 @@ from testtools.matchers import (
 
 from charmtest import CharmTest
 
-from charms.archive_auth_mirror.utils import (
-    get_paths,
+from charms.archive_auth_mirror.setup import (
     get_virtualhost_name,
     get_virtualhost_config,
     install_resources,
+    create_script_file,
     have_required_config,
 )
 
 from fakes import FakeHookEnv
-
-
-class GetPathsTest(TestCase):
-
-    def test_get_paths(self):
-        """get_paths returns service paths."""
-        paths = get_paths()
-        self.assertEqual(
-            {'base': Path('/srv/archive-auth-mirror'),
-             'cron': Path('/etc/cron.d/archive-auth-mirror'),
-             'bin': Path('/srv/archive-auth-mirror/bin'),
-             'config': Path('/srv/archive-auth-mirror/config'),
-             'static': Path('/srv/archive-auth-mirror/static'),
-             'basic-auth': Path('/srv/archive-auth-mirror/basic-auth'),
-             'sign-passphrase': Path(
-                 '/srv/archive-auth-mirror/sign-passphrase'),
-             'reprepro': Path('/srv/archive-auth-mirror/reprepro'),
-             'reprepro-conf': Path('/srv/archive-auth-mirror/reprepro/conf'),
-             'gnupghome': Path('/srv/archive-auth-mirror/reprepro/.gnupg')},
-            paths)
 
 
 class GetVirtualhostNameTest(TestCase):
@@ -73,16 +51,26 @@ class InstallResourcesTests(CharmTest):
 
     def setUp(self):
         super().setUp()
-        self.root_dir = self.useFixture(TempDir())
+        self.root_dir = self.fakes.fs.root
         os.makedirs(self.root_dir.join('etc/cron.d'))
 
         patcher_chown = mock.patch('os.chown')
         patcher_chown.start()
         self.addCleanup(patcher_chown.stop)
 
+        patcher_pwnam = mock.patch('pwd.getpwnam')
+        mock_pwnam = patcher_pwnam.start()
+        mock_pwnam.return_value.pw_uid = 0
+        self.addCleanup(patcher_pwnam.stop)
+
         patcher_grnam = mock.patch('grp.getgrnam')
         mock_grnam = patcher_grnam.start()
-        mock_grnam.return_value = mock.MagicMock(gr_gid=123)
+
+        def getgrnam(group):
+            gr_gid = 123 if group == 'www-data' else 0
+            return mock.MagicMock(gr_gid=gr_gid)
+
+        mock_grnam.side_effect = getgrnam
         self.addCleanup(patcher_grnam.stop)
 
         patcher_fchown = mock.patch('os.fchown')
@@ -101,18 +89,14 @@ class InstallResourcesTests(CharmTest):
         install_resources(root_dir=Path(self.root_dir.path))
         self.assertThat(
             self.root_dir.join('srv/archive-auth-mirror/bin/mirror-archive'),
-            FileContains(matcher=Contains("reprepro")))
+            FileContains(matcher=Contains("import mirror_archive")))
         self.assertThat(
             self.root_dir.join('srv/archive-auth-mirror/bin/manage-user'),
-            FileContains(matcher=Contains("htpasswd")))
+            FileContains(matcher=Contains("import manage_user")))
         sign_script_path = 'srv/archive-auth-mirror/bin/reprepro-sign-helper'
         self.assertThat(
             self.root_dir.join(sign_script_path),
-            FileContains(matcher=Contains("gpg")))
-        script_path = '/srv/archive-auth-mirror/bin/mirror-archive'
-        self.assertThat(
-            self.root_dir.join('etc/cron.d/archive-auth-mirror'),
-            FileContains(matcher=Contains(script_path)))
+            FileContains(matcher=Contains("import reprepro_sign_helper")))
         auth_file = self.root_dir.join('srv/archive-auth-mirror/basic-auth')
         self.assertEqual(0o100640, os.stat(auth_file).st_mode)
 
@@ -120,7 +104,23 @@ class InstallResourcesTests(CharmTest):
         """The basic-auth file is group-owned by www-data."""
         install_resources(root_dir=Path(self.root_dir.path))
         # the file ownership is changed to the gid for www-data
-        self.mock_fchown.assert_called_with(mock.ANY, 0, 123)
+        self.mock_fchown.assert_any_call(mock.ANY, 0, 123)
+
+
+class CreateScriptFileTest(CharmTest):
+
+    def test_crate_script_file(self):
+        """create_script_file renders a python script file."""
+        bindir = Path(self.fakes.fs.root.path)
+        create_script_file('foo', bindir)
+        script = bindir / 'foo'
+        content = script.read_text()
+
+        shebang = '#!{}/.venv/bin/python3\n'.format(Path.cwd().parent)
+        self.assertTrue(content.startswith(shebang))
+        self.assertIn('from archive_auth_mirror.scripts import foo', content)
+        self.assertIn('foo.main()', content)
+        self.assertEqual(0o100755, script.stat().st_mode)
 
 
 class HaveRequiredConfigsTest(TestCase):

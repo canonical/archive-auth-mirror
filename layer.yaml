@@ -1,5 +1,6 @@
 includes:
   - 'layer:basic'
+  - 'layer:leadership'
   - 'layer:nginx'
   - 'layer:nagios'
   - 'interface:ssh-keys'
