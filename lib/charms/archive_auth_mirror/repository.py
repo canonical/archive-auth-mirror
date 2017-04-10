@@ -51,7 +51,7 @@ def split_repository_uri(uri):
 
 
 def update_config(get_paths=get_paths, suite=None, sign_key_id=None,
-                  ssh_peers=None):
+                  new_ssh_peers=None):
     paths = get_paths()
     config_path = paths['config']
     config = get_config(config_path)
@@ -59,7 +59,9 @@ def update_config(get_paths=get_paths, suite=None, sign_key_id=None,
         config['suite'] = suite
     if sign_key_id is not None:
         config['sign-key-id'] = sign_key_id
-    if ssh_peers is not None:
+    if new_ssh_peers is not None:
+        ssh_peers = config.get('ssh-peers', {})
+        ssh_peers.update(new_ssh_peers)
         config['ssh-peers'] = ssh_peers
     with config_path.open('w') as config_file:
         yaml.dump(config, config_file)
