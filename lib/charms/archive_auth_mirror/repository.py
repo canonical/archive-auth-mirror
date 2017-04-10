@@ -1,8 +1,11 @@
 import getpass
 
+import yaml
+
 from charmhelpers.core.templating import render
 
 from archive_auth_mirror.utils import get_paths
+from archive_auth_mirror.script import get_config
 
 
 def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,
@@ -26,8 +29,9 @@ def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,
     render(
         'reprepro-updates.j2', str(paths['reprepro-conf'] / 'updates'),
         context, owner=owner, group=group)
-    render(
-        'config.j2', str(paths['config']), context, owner=owner, group=group)
+    update_config(
+        get_paths=get_paths, suite=context['suite'],
+        sign_key_id=context['sign_key'])
     # save the sign passphrase for the signing helper script
     with paths['sign-passphrase'].open('w') as fh:
         fh.write(sign_key_passphrase)
@@ -44,3 +48,18 @@ def split_repository_uri(uri):
     """Split the repository URI into components."""
     parts = ('url', 'suite', 'components')
     return dict(zip(parts, uri.split(' ', maxsplit=2)))
+
+
+def update_config(get_paths=get_paths, suite=None, sign_key_id=None,
+                  ssh_peers=None):
+    paths = get_paths()
+    config_path = paths['config']
+    config = get_config(config_path)
+    if suite is not None:
+        config['suite'] = suite
+    if sign_key_id is not None:
+        config['sign-key-id'] = sign_key_id
+    if ssh_peers is not None:
+        config['ssh-peers'] = ssh_peers
+    with config_path.open('w') as config_file:
+        yaml.dump(config, config_file)
