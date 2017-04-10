@@ -11,9 +11,10 @@ help: ## Print help about available targets
 
 .PHONY: charm-build
 charm-build: REV_HASH = $(shell git rev-parse HEAD)
+charm-build: INTERFACE_PATH=interfaces
 charm-build: ## Build the charm
 	rm -rf $(CHARM_OUTPUT)
-	charm build -s $(CHARM_SERIES) -o $(CHARM_OUTPUT)
+	INTERFACE_PATH=interfaces charm build -s $(CHARM_SERIES) -o $(CHARM_OUTPUT)
 	echo "commit-sha-1: $(REV_HASH)" > $(RENDERED_CHARM_DIR)/repo-info
 
 .PHONY: charm-push
