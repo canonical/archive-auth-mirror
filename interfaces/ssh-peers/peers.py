@@ -6,6 +6,16 @@ from charms.reactive import bus
 
 
 class SshPeers(RelationBase):
+    """Allow public ssh keys to be propagated among units.
+
+    When a new peer connects, a new secret SSH key should be created,
+    and public key should be propagated to the peer using
+    set_local_public_key()
+
+    The peer will then be notified about the public key and can add it
+    to its authorized_keys file.
+    """
+
     scope = scopes.UNIT
 
     class states(bus.StateList):

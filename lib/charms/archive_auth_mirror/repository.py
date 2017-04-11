@@ -52,6 +52,7 @@ def split_repository_uri(uri):
 
 def update_config(get_paths=get_paths, suite=None, sign_key_id=None,
                   new_ssh_peers=None):
+    """Update the config with the given parameters."""
     paths = get_paths()
     config_path = paths['config']
     config = get_config(config_path)
