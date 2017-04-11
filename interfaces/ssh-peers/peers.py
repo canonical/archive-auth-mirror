@@ -35,13 +35,14 @@ class SshPeers(RelationBase):
         if not new_remote_public_key:
             hookenv.log("No remote public key set")
             self.remove_state(self.states.new_remote_public_key)
+            return
+
+        if new_remote_public_key != previous_remote_public_key:
+            hookenv.log("New remote public key")
+            self.set_local('remote-public-ssh-key', new_remote_public_key)
+            self.set_state(self.states.new_remote_public_key)
         else:
-            if new_remote_public_key != previous_remote_public_key:
-                hookenv.log("New remote public key")
-                self.set_local('remote-public-ssh-key', new_remote_public_key)
-                self.set_state(self.states.new_remote_public_key)
-            else:
-                hookenv.log("Remote public key is still the same")
+            hookenv.log("Remote public key is still the same")
 
     @hook('{peers:ssh-peers}-relation-{departed}')
     def departed(self):
