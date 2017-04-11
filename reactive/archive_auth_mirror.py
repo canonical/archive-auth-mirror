@@ -40,7 +40,7 @@ def configure_website(website):
     set_state(charm_state('website.configured'))
 
 
-@when_not('ssh-peers.local_public_key')
+@when_not('ssh-peers.local-public-key')
 @when('ssh-peers.connected')
 def set_ssh_key(ssh_keys):
     public_key_path = str(utils.get_paths()['ssh-key']) + '.pub'
@@ -49,7 +49,7 @@ def set_ssh_key(ssh_keys):
     ssh_keys.set_local_public_key(public_key)
 
 
-@when('ssh-peers.new_remote_public_key')
+@when('ssh-peers.new-remote-public-key')
 def add_authorized_key(ssh_keys):
     remote_public_key = ssh_keys.get_remote('public-ssh-key')
     hookenv.log("Adding key: " + remote_public_key)

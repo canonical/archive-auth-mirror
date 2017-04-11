@@ -20,9 +20,9 @@ class SshPeers(RelationBase):
 
     class states(bus.StateList):
         connected = bus.State('{relation_name}.connected')
-        local_public_key = bus.State('{relation_name}.local_public_key')
+        local_public_key = bus.State('{relation_name}.local-public-key')
         new_remote_public_key = bus.State(
-            '{relation_name}.new_remote_public_key')
+            '{relation_name}.new-remote-public-key')
 
     @hook('{peers:ssh-peers}-relation-{joined}')
     def joined(self):
