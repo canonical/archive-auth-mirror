@@ -50,8 +50,8 @@ def split_repository_uri(uri):
     return dict(zip(parts, uri.split(' ', maxsplit=2)))
 
 
-def update_config(get_paths=get_paths, suite=None, sign_key_id=None,
-                  new_ssh_peers=None):
+def update_config(suite=None, sign_key_id=None, new_ssh_peers=None,
+                  get_paths=get_paths):
     """Update the config with the given parameters."""
     paths = get_paths()
     config_path = paths['config']
