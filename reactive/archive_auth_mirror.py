@@ -35,20 +35,20 @@ def configure_website(website):
     website.configure(port=hookenv.config()['port'])
 
 
-@when_not('ssh-keys.has_public_key')
-@when('ssh-keys.connected')
+@when_not('ssh-peers.local_public_key')
+@when('ssh-peers.connected')
 def set_ssh_key(ssh_keys):
-    ssh_keys.set_public_key(ssh.get_public_key())
+    ssh_keys.set_local_public_key(ssh.get_public_key())
 
 
-@when('ssh-keys.authorized_key')
+@when('ssh-peers.new_remote_public_key')
 def add_authorized_key(ssh_keys):
     hookenv.log("Adding key: " + ssh_keys.get_authorized_key())
     remote_public_key = ssh_keys.get_authorized_key()
     ssh.add_authorized_key(remote_public_key)
     ssh_peer = {ssh_keys.get_remote('private-address'): remote_public_key}
     repository.update_config(new_ssh_peers=ssh_peer)
-    ssh_keys.authorzied_key_added()
+    ssh_keys.remove_state(ssh_keys.states.new_remote_public_key)
 
 
 @when(charm_state('installed'), 'config.changed.mirror-uri')

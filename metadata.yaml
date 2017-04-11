@@ -9,6 +9,5 @@ tags:
   - security
 
 peers:
-    ssh-keys:
-        interface: ssh-keys
-        scope: global
+    ssh-peers:
+        interface: ssh-peers

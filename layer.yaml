@@ -3,7 +3,7 @@ includes:
   - 'layer:leadership'
   - 'layer:nginx'
   - 'layer:nagios'
-  - 'interface:ssh-keys'
+  - 'interface:ssh-peers'
 repo: https://github.com/CanonicalLtd/archive-auth-mirror
 options:
   basic:
