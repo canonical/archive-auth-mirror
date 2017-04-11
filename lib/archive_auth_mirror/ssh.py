@@ -1,3 +1,5 @@
+"""Helper functions to deal with ssh."""
+
 import subprocess
 
 
