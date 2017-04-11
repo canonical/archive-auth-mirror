@@ -46,12 +46,12 @@ def config_set():
         return
 
     # configure mirroring
-    mirror_fprint, sign_fprint = gpg.import_gpg_keys(
+    fingerprints = gpg.import_keys(
         config['mirror-gpg-key'], config['sign-gpg-key'])
     sign_gpg_passphrase = config.get('sign-gpg-passphrase', '').strip()
     repository.configure_reprepro(
         config['mirror-uri'].strip(), config['mirror-archs'].strip(),
-        mirror_fprint, sign_fprint, sign_gpg_passphrase)
+        fingerprints.mirror, fingerprints.sign, sign_gpg_passphrase)
     hookenv.status_set('active', 'Mirroring configured')
 
 

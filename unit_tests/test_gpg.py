@@ -1,6 +1,13 @@
+from pathlib import Path
+
 from charmtest import CharmTest
 
-from archive_auth_mirror.gpg import import_gpg_keys
+from archive_auth_mirror.utils import get_paths
+from archive_auth_mirror.gpg import (
+    import_keys,
+    inline_sign,
+    detach_sign,
+)
 
 
 PUBLIC_KEY_FINGERPRINT = 'E275C4776E00A6BAED081A97DE2922ADDC4EDFF2'
@@ -97,14 +104,62 @@ FUB99LPi8uvx+QjcHLg=
 '''
 
 
-class ImportGpgKeysTest(CharmTest):
+class ImportKeysTest(CharmTest):
 
-    def test_import_key(self):
-        """imort_gpg_keys imports the mirror and sign keys."""
-        fingerprints = import_gpg_keys(
+    def test_import_keys(self):
+        """import_keys imports the mirror and sign keys."""
+        fingerprints = import_keys(
             PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
             gnupghome=self.fakes.fs.root.path)
         # returned fingerprints are 8 characters long
         self.assertEqual(
             (PUBLIC_KEY_FINGERPRINT[-8:], SECRET_KEY_FINGERPRINT[-8:]),
             fingerprints)
+
+
+class InlineSignTest(CharmTest):
+
+    def test_inline_sign(self):
+        """inline_sign creates an inline signature for a file."""
+        paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
+        paths['gnupghome'].mkdir(parents=True)
+        paths['sign-passphrase'].write_text('')
+
+        fingerprints = import_keys(
+            PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
+            gnupghome=str(paths['gnupghome']))
+
+        unsigned_file = Path(self.fakes.fs.root.join('unsigned'))
+        unsigned_file.write_text('some text to sign')
+        inline_sign_file = Path(self.fakes.fs.root.join('signed'))
+
+        inline_sign(
+            fingerprints[1], unsigned_file, inline_sign_file, paths=paths)
+
+        signed_content = inline_sign_file.read_text()
+        self.assertIn('some text to sign', signed_content)
+        self.assertIn('-----BEGIN PGP SIGNATURE-----', signed_content)
+
+
+class DetachSignTest(CharmTest):
+
+    def test_detach_sign(self):
+        """detach_sign creates a detached signature for a file."""
+        paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
+        paths['gnupghome'].mkdir(parents=True)
+        paths['sign-passphrase'].write_text('')
+
+        fingerprints = import_keys(
+            PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
+            gnupghome=str(paths['gnupghome']))
+
+        unsigned_file = Path(self.fakes.fs.root.join('unsigned'))
+        unsigned_file.write_text('some text to sign')
+        detach_sign_file = Path(self.fakes.fs.root.join('signature'))
+
+        detach_sign(
+            fingerprints[1], unsigned_file, detach_sign_file, paths=paths)
+
+        signature = detach_sign_file.read_text()
+        self.assertTrue(signature.startswith('-----BEGIN PGP SIGNATURE-----'))
+        self.assertTrue(signature.endswith('-----END PGP SIGNATURE-----\n'))
