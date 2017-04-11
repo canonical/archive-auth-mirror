@@ -11,6 +11,7 @@ help: ## Print help about available targets
 
 .PHONY: charm-build
 charm-build: REV_HASH = $(shell git rev-parse HEAD)
+charm-build: export INTERFACE_PATH = interfaces
 charm-build: ## Build the charm
 	rm -rf $(CHARM_OUTPUT)
 	charm build -s $(CHARM_SERIES) -o $(CHARM_OUTPUT)

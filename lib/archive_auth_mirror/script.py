@@ -26,6 +26,6 @@ def setup_logger(level=logging.DEBUG, echo=False):
 def get_config(config_file):
     """Return the config or None if no file is found."""
     if not config_file.exists():
-        return
+        return {}
     with config_file.open() as fh:
         return yaml.load(fh)

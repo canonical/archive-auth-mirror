@@ -7,3 +7,7 @@ series:
   - xenial
 tags:
   - security
+
+peers:
+    ssh-peers:
+        interface: ssh-peers
