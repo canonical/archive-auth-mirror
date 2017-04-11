@@ -5,7 +5,7 @@ from charms.reactive import when, when_not, set_state, remove_state, only_once
 from charms.layer.nginx import configure_site
 
 from charms.archive_auth_mirror import repository, setup
-from archive_auth_mirror import gpg, cron, ssh
+from archive_auth_mirror import gpg, cron, ssh, utils
 
 
 def charm_state(state):
@@ -22,7 +22,7 @@ def install():
 @when(charm_state('installed'))
 @only_once
 def create_ssh_key():
-    ssh.create_key()
+    ssh.create_key(utils.get_paths()['ssh-key'])
 
 
 @when(charm_state('installed'), 'nginx.available')
@@ -38,14 +38,18 @@ def configure_website(website):
 @when_not('ssh-peers.local_public_key')
 @when('ssh-peers.connected')
 def set_ssh_key(ssh_keys):
-    ssh_keys.set_local_public_key(ssh.get_public_key())
+    public_key_path = str(utils.get_paths()['ssh-key']) + '.pub'
+    with open(public_key_path, 'r') as public_key_file:
+        public_key = public_key_file.read()
+    ssh_keys.set_local_public_key(public_key)
 
 
 @when('ssh-peers.new_remote_public_key')
 def add_authorized_key(ssh_keys):
     remote_public_key = ssh_keys.get_remote('public-ssh-key')
     hookenv.log("Adding key: " + remote_public_key)
-    ssh.add_authorized_key(remote_public_key)
+    ssh.add_authorized_key(
+        remote_public_key, utils.get_paths()['authorized-keys'])
     ssh_peer = {ssh_keys.get_remote('private-address'): remote_public_key}
     repository.update_config(new_ssh_peers=ssh_peer)
     ssh_keys.remove_state(ssh_keys.states.new_remote_public_key)
