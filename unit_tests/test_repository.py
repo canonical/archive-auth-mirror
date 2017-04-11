@@ -2,6 +2,8 @@ import textwrap
 import unittest
 from pathlib import Path
 
+import yaml
+
 from charmtest import CharmTest
 
 from archive_auth_mirror.utils import get_paths
@@ -44,12 +46,8 @@ class ConfigureRepreproTest(CharmTest):
                 '''),
             (paths['reprepro-conf'] / 'updates').read_text())
         self.assertEqual(
-            textwrap.dedent(
-                '''\
-                suite: xenial
-                sign-key-id: 'CDCDCDCD'
-                '''),
-            paths['config'].read_text())
+            {'suite': 'xenial', 'sign-key-id': 'CDCDCDCD'},
+            yaml.load(paths['config'].read_text()))
 
 
 class DisableMirroringTest(CharmTest):

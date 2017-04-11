@@ -10,8 +10,8 @@ from archive_auth_mirror.script import get_config
 class GetConfigTest(TestWithFixtures):
 
     def test_config_not_found(self):
-        """If the config file is not found, get_config returns None."""
-        self.assertIsNone(get_config(Path('/not/here')))
+        """If the config file is not found, get_config returns {}."""
+        self.assertEqual({}, get_config(Path('/not/here')))
 
     def test_load_config(self):
         """If the file is found, it's content is returned as YAML."""
