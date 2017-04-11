@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+import unittest
+
+import requests
+
+import amulet
+
+
+class TestCharm(unittest.TestCase):
+
+    def setUp(self):
+        self.d = amulet.Deployment(series='xenial')
+        self.d.add('archive-auth-mirror', units=2)
+        self.d.setup(timeout=900)
+        self.d.sentry.wait()
+
+        self.unit1 = self.d.sentry['archive-auth-mirror'][0]
+        self.unit2 = self.d.sentry['archive-auth-mirror'][1]
+        self.unit_address1 = self.unit1.info['public-address']
+        self.unit_address2 = self.unit2.info['public-address']
+
+    def test_10_can_ssh_1_to_2(self):
+        """Unit 1 can ssh to unit 2 using its private key."""
+        self.unit1.run(
+            'ssh -o StrictHostKeyChecking=no '
+            '-i /srv/archive-auth-mirror/ssh-key root@{} '
+            '-- touch /root/ssh-succeeded'.format(self.unit_address2))
+        self.assertEqual('', self.unit2.file_contents('/root/ssh-succeeded'))
+
+    def test_20_can_ssh_2_to_1(self):
+        """Unit 2 can ssh to unit 1 using its private key."""
+        self.unit2.run(
+            'ssh -o StrictHostKeyChecking=no '
+            '-i /srv/archive-auth-mirror/ssh-key root@{} '
+            '-- touch /root/ssh-succeeded'.format(self.unit_address1))
+        self.assertEqual('', self.unit1.file_contents('/root/ssh-succeeded'))
+
+
+if __name__ == '__main__':
+    unittest.main()
