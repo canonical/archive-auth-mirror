@@ -1,3 +1,5 @@
+"""Repository configuration functions."""
+
 import getpass
 
 import yaml

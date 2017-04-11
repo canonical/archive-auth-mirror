@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fixtures import TestWithFixtures, TempDir
+from charmtest import CharmTest
 
 from archive_auth_mirror.scripts.manage_user import (
     add_user,
@@ -9,12 +9,11 @@ from archive_auth_mirror.scripts.manage_user import (
 )
 
 
-class ManageUserTest(TestWithFixtures):
+class ManageUserTest(CharmTest):
 
     def setUp(self):
         super().setUp()
-        tempdir = self.useFixture(TempDir())
-        self.auth_file = Path(tempdir.path) / 'auth-file'
+        self.auth_file = Path(self.fakes.fs.root.path) / 'auth-file'
         self.auth_file.touch()
 
     def test_add_user(self):
