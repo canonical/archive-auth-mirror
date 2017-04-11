@@ -43,8 +43,8 @@ def set_ssh_key(ssh_keys):
 
 @when('ssh-peers.new_remote_public_key')
 def add_authorized_key(ssh_keys):
-    hookenv.log("Adding key: " + ssh_keys.get_authorized_key())
-    remote_public_key = ssh_keys.get_authorized_key()
+    remote_public_key = ssh_keys.get_remote('public-ssh-key')
+    hookenv.log("Adding key: " + remote_public_key)
     ssh.add_authorized_key(remote_public_key)
     ssh_peer = {ssh_keys.get_remote('private-address'): remote_public_key}
     repository.update_config(new_ssh_peers=ssh_peer)

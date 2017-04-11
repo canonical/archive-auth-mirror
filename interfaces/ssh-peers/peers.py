@@ -20,15 +20,15 @@ class SshPeers(RelationBase):
 
     @hook('{peers:ssh-peers}-relation-{changed,joined}')
     def changed(self):
-        authorized_key = self.get_authorized_key()
+        previous_remote_public_key = self.get_local('remote-public-ssh-key')
         new_remote_public_key = self.get_remote('public-ssh-key')
         if not new_remote_public_key:
             hookenv.log("No remote public key set")
             self.remove_state(self.states.new_remote_public_key)
         else:
-            if new_remote_public_key != authorized_key:
+            if new_remote_public_key != previous_remote_public_key:
                 hookenv.log("New remote public key")
-                self.set_local('authorized-key', new_remote_public_key)
+                self.set_local('remote-public-ssh-key', new_remote_public_key)
                 self.set_state(self.states.new_remote_public_key)
             else:
                 hookenv.log("Remote public key is still the same")
