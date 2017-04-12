@@ -1,4 +1,4 @@
-"""Wrapper around the rsync tool."""
+"""Wrapper around the reprepro tool."""
 
 from subprocess import Popen, PIPE, CalledProcessError
 
