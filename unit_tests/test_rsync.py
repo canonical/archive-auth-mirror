@@ -13,14 +13,14 @@ class RsyncTest(TestCase):
     @mock.patch('subprocess.check_output')
     def test_rsync(self, mock_check_output):
         """The rsync copies a filesytem tree using rsync."""
-        rsync(Path('/foo/bar'), '1.2.3.4')
+        rsync('1.2.3.4', Path('/foo/bar'))
         mock_check_output.assert_called_with(
             ['/usr/bin/rsync', '-a', '/foo/bar', '1.2.3.4:/foo/bar'])
 
     @mock.patch('subprocess.check_output')
     def test_rsync_delete(self, mock_check_output):
         """If the delete flag is True, the --delete option is passed."""
-        rsync(Path('/foo/bar'), '1.2.3.4', delete=True)
+        rsync('1.2.3.4', Path('/foo/bar'), delete=True)
         mock_check_output.assert_called_with(
             ['/usr/bin/rsync', '-a', '--delete', '/foo/bar',
              '1.2.3.4:/foo/bar'])
@@ -28,7 +28,7 @@ class RsyncTest(TestCase):
     @mock.patch('subprocess.check_output')
     def test_rsync_rsh(self, mock_check_output):
         """If the rsh flag is not None, the --rsh option is passed."""
-        rsync(Path('/foo/bar'), '1.2.3.4', rsh='ssh -i my-identity')
+        rsync('1.2.3.4', Path('/foo/bar'), rsh='ssh -i my-identity')
         mock_check_output.assert_called_with(
             ['/usr/bin/rsync', '-a', '--rsh', 'ssh -i my-identity', '/foo/bar',
              '1.2.3.4:/foo/bar'])
@@ -44,7 +44,7 @@ class RsyncMultiTest(TestWithFixtures):
     def test_each_host(self, mock_check_output):
         """The rsync call is performed for each host."""
         rsync_multi(
-            Path('/foo/bar'), ['1.2.3.4', '5.6.7.8'], logging.getLogger())
+            ['1.2.3.4', '5.6.7.8'], Path('/foo/bar'), logging.getLogger())
         mock_check_output.assert_has_calls(
             [mock.call(
                 ['/usr/bin/rsync', '-a', '/foo/bar', '1.2.3.4:/foo/bar']),
@@ -61,7 +61,7 @@ class RsyncMultiTest(TestWithFixtures):
 
         mock_check_output.side_effect = check_output
         rsync_multi(
-            Path('/foo/bar'), ['1.2.3.4', '5.6.7.8'], logging.getLogger())
+            ['1.2.3.4', '5.6.7.8'], Path('/foo/bar'), logging.getLogger())
         self.assertIn(
             'rsync to 1.2.3.4 failed: something failed\n', self.logger.output)
         # rsync to the second host is exectuted too
@@ -72,7 +72,7 @@ class RsyncMultiTest(TestWithFixtures):
     def test_rsh(self, mock_check_output):
         """The rsh flag is passed through."""
         rsync_multi(
-            Path('/foo/bar'), ['1.2.3.4'], logging.getLogger(),
+            ['1.2.3.4'], Path('/foo/bar'), logging.getLogger(),
             rsh='ssh -i my-identity')
         mock_check_output.assert_called_with(
             ['/usr/bin/rsync', '-a', '--rsh', 'ssh -i my-identity', '/foo/bar',

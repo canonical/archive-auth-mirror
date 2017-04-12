@@ -1,5 +1,6 @@
 """Mirror and update a repository."""
 
+import functools
 import subprocess
 import sys
 
@@ -22,6 +23,7 @@ def main():
     # popolate known_hosts with the right keys. But we trust the
     # network, and we don't push any sensitive data.
     rsh = 'ssh -o StrictHostKeyChecking=no -i {}'.format(paths['ssh-key'])
+    remote_sync = functools.partial(rsync_multi, other_units, rsh=rsh)
 
     logger.info('starting mirroring')
 
@@ -33,34 +35,27 @@ def main():
             'update', suite)
 
         logger.info('rsyncing new pool packages to peer units')
-        rsync_multi(paths['static'] / 'ubuntu', other_units, logger, rsh=rsh)
+        remote_sync(paths['static'] / 'ubuntu', logger)
 
         logger.info('generating new dists directory')
         reprepro.execute('export', suite)
 
         logger.info('rsyncing new dists directory to peer units')
-        rsync_multi(
-            paths['static'] / 'ubuntu' / 'dists', other_units, logger, rsh=rsh)
+        remote_sync(paths['static'] / 'ubuntu' / 'dists', logger)
 
         logger.info('deleting old pool packages')
         reprepro.execute('deleteunreferenced')
 
         logger.info('deleting old pool packages on peer units')
-        rsync_multi(
-            paths['static'] / 'ubuntu', other_units, logger, rsh=rsh,
-            delete=True)
+        remote_sync(paths['static'] / 'ubuntu', logger, delete=True)
 
         logger.info('rsyncing reprepro dir to peer units')
         # Push only the reprepro db and lists, not the conf dir. Each
         # unit should generate the conf dir themselves, so we don't push
         # it, since it contains the private signing key, which is
         # sensitive data.
-        rsync_multi(
-            paths['reprepro'] / 'db', other_units, logger, rsh=rsh,
-            delete=True)
-        rsync_multi(
-            paths['reprepro'] / 'lists', other_units, logger, rsh=rsh,
-            delete=True)
+        remote_sync(paths['reprepro'] / 'db', logger, delete=True)
+        remote_sync(paths['reprepro'] / 'lists', logger, delete=True)
 
         logger.info('mirroring completed')
     except subprocess.CalledProcessError:
