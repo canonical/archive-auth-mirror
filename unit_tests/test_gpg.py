@@ -5,6 +5,7 @@ from charmtest import CharmTest
 from archive_auth_mirror.utils import get_paths
 from archive_auth_mirror.gpg import (
     import_keys,
+    export_public_key,
     inline_sign,
     detach_sign,
 )
@@ -115,6 +116,24 @@ class ImportKeysTest(CharmTest):
         self.assertEqual(
             (PUBLIC_KEY_FINGERPRINT[-8:], SECRET_KEY_FINGERPRINT[-8:]),
             fingerprints)
+
+
+class ExportPublicKeyTest(CharmTest):
+
+    def test_export_public_key(self):
+        """export_public_key exports the specified public key."""
+        gnupghome = self.fakes.fs.root.path
+        public_key_file = Path(self.fakes.fs.root.path) / 'public.asc'
+        fingerprints = import_keys(
+            PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
+            gnupghome=gnupghome)
+        export_public_key(
+            fingerprints.sign, public_key_file, gnupghome=gnupghome)
+        material = public_key_file.read_text()
+        self.assertTrue(
+            material.startswith('-----BEGIN PGP PUBLIC KEY BLOCK-----'))
+        self.assertTrue(
+            material.endswith('-----END PGP PUBLIC KEY BLOCK-----\n'))
 
 
 class InlineSignTest(CharmTest):
