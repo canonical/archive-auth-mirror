@@ -14,7 +14,7 @@ def rsync(host, path, rsh=None, delete=False):
     the destination.
 
     """
-    path = str(path.absolute())
+    path = str(path.absolute()) + '/'
     command = ['/usr/bin/rsync', '-a']
     if rsh is not None:
         command.extend(['--rsh', rsh])
