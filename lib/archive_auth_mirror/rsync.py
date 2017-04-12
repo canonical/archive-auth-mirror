@@ -15,8 +15,23 @@ def rsync(path, host, delete=False):
 
     """
     path = str(path.absolute())
-    command = ['rsync', '-a']
+    command = ['/usr/bin/rsync', '-a']
     if delete:
         command.append('--delete')
     command.extend([path, '{}:{}'.format(host, path)])
-    subprocess.check_call(command)
+    subprocess.check_output(command)
+
+
+def rsync_multi(path, hosts, logger, delete=False):
+    """Copy a filesystem tree using rsync to multiple hosts.
+
+    If a call to rsync to a host fails, the error is logged via the provided
+    logger and the next host is attempted.
+
+    """
+    for host in hosts:
+        try:
+            rsync(path, host, delete=delete)
+        except subprocess.CalledProcessError as error:
+            logger.error(
+                'rsync to {} failed: {}'.format(host, error.output))
