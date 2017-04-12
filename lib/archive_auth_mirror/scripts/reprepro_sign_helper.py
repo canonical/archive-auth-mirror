@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Helper for reprepro to sign archive lists."""
 
 import sys
 import argparse

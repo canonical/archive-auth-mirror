@@ -1,3 +1,5 @@
+"""Install and configure archive-auth-mirror to mirror an Ubuntu repository."""
+
 from charmhelpers.core import hookenv
 
 from charms.reactive import when, when_not, set_state, remove_state, only_once

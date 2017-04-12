@@ -1,3 +1,5 @@
+"""Service installation and configuration functions."""
+
 from pathlib import Path
 
 from charmhelpers.core import hookenv, host

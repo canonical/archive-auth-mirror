@@ -1,3 +1,5 @@
+"""Miscellaneous helper functions."""
+
 from pathlib import Path
 
 

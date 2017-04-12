@@ -1,16 +1,16 @@
 from pathlib import Path
 
-from fixtures import TestWithFixtures, TempDir
+from charmtest import CharmTest
 
 from archive_auth_mirror.utils import get_paths
 from archive_auth_mirror.cron import install_crontab, remove_crontab
 
 
-class InstallCrontabTest(TestWithFixtures):
+class InstallCrontabTest(CharmTest):
 
     def test_install_crontab(self):
         """install_crontab creates a crontab file"""
-        root_dir = Path(self.useFixture(TempDir()).path)
+        root_dir = Path(self.fakes.fs.root.path)
         (root_dir / 'etc/cron.d').mkdir(parents=True)
         paths = get_paths(root_dir=root_dir)
         install_crontab(paths=paths)
@@ -22,13 +22,13 @@ class InstallCrontabTest(TestWithFixtures):
         self.assertIn(str(script), content)
 
 
-class RemoveCrontabTest(TestWithFixtures):
+class RemoveCrontabTest(CharmTest):
 
     def setUp(self):
         super().setUp()
-        self.root_dir = Path(self.useFixture(TempDir()).path)
-        (self.root_dir / 'etc/cron.d').mkdir(parents=True)
-        self.paths = get_paths(root_dir=self.root_dir)
+        root_dir = Path(self.fakes.fs.root.path)
+        (root_dir / 'etc/cron.d').mkdir(parents=True)
+        self.paths = get_paths(root_dir=root_dir)
 
     def test_remove_crontab(self):
         """remove_crontab removes the crontab file."""
