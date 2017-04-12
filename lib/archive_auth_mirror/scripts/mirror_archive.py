@@ -51,11 +51,15 @@ def main():
             delete=True)
 
         logger.info('rsyncing reprepro dir to peer units')
-        # Push only the reprepro db, not the conf dir. Each unit should
-        # generate the conf dir themselves, so we don't push it, since
-        # it contains the private signing key, which is sensitive data.
+        # Push only the reprepro db and lists, not the conf dir. Each
+        # unit should generate the conf dir themselves, so we don't push
+        # it, since it contains the private signing key, which is
+        # sensitive data.
         rsync_multi(
-            paths['reprepro'] / 'reprepro', other_units, logger, rsh=rsh,
+            paths['reprepro'] / 'db', other_units, logger, rsh=rsh,
+            delete=True)
+        rsync_multi(
+            paths['reprepro'] / 'lists', other_units, logger, rsh=rsh,
             delete=True)
 
         logger.info('mirroring completed')
