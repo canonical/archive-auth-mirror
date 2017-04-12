@@ -31,9 +31,9 @@ def remove_user(auth_file, user):
 
 def get_parser():
     parser = argparse.ArgumentParser(description=__doc__)
-    action = subparsers = parser.add_subparsers(
+    subparsers = parser.add_subparsers(
         dest='action', help='action to perform')
-    action.required = True
+    subparsers.required = True
 
     add_action = subparsers.add_parser(
         'add',
