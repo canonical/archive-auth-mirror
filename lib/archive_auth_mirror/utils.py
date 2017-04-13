@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import yaml
+
 
 def get_paths(root_dir=None):
     """Return path for the service tree.
@@ -39,3 +41,29 @@ def get_paths(root_dir=None):
         'reprepro': reprepro_dir,
         'reprepro-conf': reprepro_dir / 'conf',
         'gnupghome': reprepro_dir / '.gnupg'}
+
+
+def get_config(config_path=None):
+    """Return a dict with the service configuration."""
+    if config_path is None:
+        config_path = get_paths()['config']
+    if not config_path.exists():
+        return {}
+    with config_path.open() as fh:
+        return yaml.load(fh)
+
+
+def update_config(config_path=None, suite=None, sign_key_id=None,
+                  new_ssh_peers=None):
+    """Update the config with the given parameters."""
+    config = get_config(config_path=config_path)
+    if suite is not None:
+        config['suite'] = suite
+    if sign_key_id is not None:
+        config['sign-key-id'] = sign_key_id
+    if new_ssh_peers is not None:
+        ssh_peers = config.get('ssh-peers', {})
+        ssh_peers.update(new_ssh_peers)
+        config['ssh-peers'] = ssh_peers
+    with config_path.open('w') as config_file:
+        yaml.dump(config, config_file)

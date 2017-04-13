@@ -4,9 +4,9 @@ import sys
 import argparse
 from pathlib import Path
 
-from ..utils import get_paths
+from ..utils import get_config
 from ..gpg import inline_sign, detach_sign
-from ..script import setup_logger, get_config
+from ..script import setup_logger
 
 
 def parse_args(args=None):
@@ -23,8 +23,7 @@ def parse_args(args=None):
 
 def main():
     logger = setup_logger()
-    paths = get_paths()
-    config = get_config(paths['config'])
+    config = get_config()
     if not config:
         logger.error('no config file found')
         sys.exit(1)

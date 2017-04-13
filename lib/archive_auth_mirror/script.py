@@ -5,8 +5,6 @@ import sys
 import logging
 from logging.handlers import SysLogHandler
 
-import yaml
-
 
 def setup_logger(level=logging.DEBUG, echo=False):
     """Setup and return the logger for the script.
@@ -21,11 +19,3 @@ def setup_logger(level=logging.DEBUG, echo=False):
     if echo:
         logger.addHandler(logging.StreamHandler())
     return logger
-
-
-def get_config(config_file):
-    """Return the config or None if no file is found."""
-    if not config_file.exists():
-        return {}
-    with config_file.open() as fh:
-        return yaml.load(fh)
