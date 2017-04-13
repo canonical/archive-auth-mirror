@@ -1,39 +1,36 @@
 """Locking using a lock file."""
 
-import os
+import fcntl
 
 
 class AlreadyLocked(Exception):
     """A lock is already present."""
 
 
-def lock(lockfile):
-    """Create a lockfile."""
-    if is_valid_lock(lockfile):
-        raise AlreadyLocked(lockfile)
+class LockFile:
+    """A file used for locking."""
 
-    lockfile.write_text(str(os.getpid()))
+    _fh = None
 
+    def __init__(self, path):
+        self.path = path
 
-def unlock(lockfile):
-    """Remove an existing lock."""
-    if lockfile.exists():
-        lockfile.unlink()
+    def lock(self):
+        """Lock the file."""
+        self.path.touch()
+        self._fh = self.path.open('w')
+        try:
+            fcntl.flock(self._fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except IOError:
+            self._close()
+            raise AlreadyLocked()
 
+    def release(self):
+        """Release the lock on the file."""
+        if self._fh is not None:
+            fcntl.flock(self._fh, fcntl.LOCK_UN)
+            self._close()
 
-def is_valid_lock(lockfile):
-    """Return whether the lockfile exists and points to an existing process."""
-    if not lockfile.exists():
-        return False
-
-    try:
-        pid = int(lockfile.read_text())
-    except ValueError:
-        return False
-
-    try:
-        os.kill(pid, 0)
-    except ProcessLookupError:
-        return False
-
-    return True
+    def _close(self):
+        self._fh.close()
+        self._fh = None

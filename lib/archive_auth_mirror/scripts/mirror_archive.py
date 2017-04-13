@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from ..utils import get_paths
-from ..lock import lock, unlock, AlreadyLocked
+from ..lock import LockFile, AlreadyLocked
 from ..reprepro import Reprepro
 from ..rsync import rsync_multi
 from ..script import (
@@ -25,9 +25,10 @@ def main():
     # network, and we don't push any sensitive data.
     rsh = 'ssh -o StrictHostKeyChecking=no -i {}'.format(paths['ssh-key'])
     remote_sync = functools.partial(rsync_multi, other_units, rsh=rsh)
+    lockfile = LockFile(paths['lockfile'])
 
     try:
-        lock(paths['lockfile'])
+        lockfile.lock()
     except AlreadyLocked:
         logger.error('another process is already running, exiting')
         sys.exit(1)
@@ -69,4 +70,4 @@ def main():
         logger.error('mirroring failed')
         sys.exit(1)
     finally:
-        unlock(paths['lockfile'])
+        lockfile.release()
