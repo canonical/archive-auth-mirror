@@ -18,7 +18,7 @@ def main():
     paths = get_paths()
     config = get_config(paths['config'])
     suite = config['suite']
-    other_units = config['ssh-peers'].keys()
+    other_units = config.get('ssh-peers', {}).keys()
     # Using StrictHostKeyChecking=no isn't ideal, but we don't yet
     # popolate known_hosts with the right keys. But we trust the
     # network, and we don't push any sensitive data.
