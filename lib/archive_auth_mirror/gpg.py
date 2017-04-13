@@ -28,6 +28,16 @@ def import_keys(mirror_key, sign_key, gnupghome=None):
         fingerprint(imported_mirror_key), fingerprint(imported_sign_key))
 
 
+def export_public_key(key_id, path, gnupghome=None):
+    """Export a public key in ASCII format to the specified path."""
+    if not gnupghome:
+        gnupghome = str(get_paths()['gnupghome'])
+    gpg = gnupg.GPG(homedir=gnupghome)
+    material = gpg.export_keys(key_id)
+    with path.open('w') as fh:
+        fh.write(material)
+
+
 def inline_sign(key_id, unsigned_file, inline_sign_file, paths=None):
     """Create an inline-signed file."""
     _sign(

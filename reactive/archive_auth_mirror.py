@@ -80,6 +80,8 @@ def config_set():
     repository.configure_reprepro(
         config['mirror-uri'].strip(), config['mirror-archs'].strip(),
         fingerprints.mirror, fingerprints.sign, sign_gpg_passphrase)
+    # export the public key used to sign the repository
+    _export_sign_key(fingerprints.sign)
     hookenv.status_set('active', 'Mirroring configured')
 
 
@@ -110,3 +112,9 @@ def _configure_static_serve():
     vhost_config = setup.get_virtualhost_config()
     configure_site(
         'archive-auth-mirror', 'nginx-static.j2', **vhost_config)
+
+
+def _export_sign_key(key_id):
+    """Export the public key for the repo under the static serve."""
+    filename = utils.get_paths()['static'] / 'key.asc'
+    gpg.export_public_key(key_id, filename)
