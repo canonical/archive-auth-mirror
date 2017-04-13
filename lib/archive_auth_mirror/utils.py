@@ -13,10 +13,12 @@ def get_paths(root_dir=None):
     ├── bin
     │   └── mirror-archive  -- the mirroring script
     ├── config.yaml  -- the script configuration file
+    ├── mirror-archive.lock  -- lockfile for the mirror-archive script
     ├── reprepro
     │   └── conf  -- reprepro configuration files
     │       └── .gnupg  -- GPG config for reprepro
     ├── sign-passphrase  -- contains the passphrase for the GPG sign key
+    ├── ssh-key  -- the ssh key used by rsync
     └── static  -- the root of the virtualhost, contains the repository
     """
     if root_dir is None:
@@ -33,6 +35,7 @@ def get_paths(root_dir=None):
         'sign-passphrase': base_dir / 'sign-passphrase',
         'ssh-key': base_dir / 'ssh-key',
         'authorized-keys': root_dir / 'root' / '.ssh' / 'authorized_keys',
+        'lockfile': base_dir / 'mirror-archive.lock',
         'reprepro': reprepro_dir,
         'reprepro-conf': reprepro_dir / 'conf',
         'gnupghome': reprepro_dir / '.gnupg'}
