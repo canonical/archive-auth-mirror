@@ -4,20 +4,17 @@ import functools
 import subprocess
 import sys
 
-from ..utils import get_paths
+from ..utils import get_paths, get_config
 from ..lock import LockFile, AlreadyLocked
 from ..reprepro import Reprepro
 from ..rsync import rsync_multi
-from ..script import (
-    setup_logger,
-    get_config,
-)
+from ..script import setup_logger
 
 
 def main():
     logger = setup_logger(echo=True)
     paths = get_paths()
-    config = get_config(paths['config'])
+    config = get_config()
     suite = config['suite']
     other_units = config.get('ssh-peers', {}).keys()
     # Using StrictHostKeyChecking=no isn't ideal, but we don't yet
