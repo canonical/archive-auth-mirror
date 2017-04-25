@@ -58,7 +58,8 @@ def add_authorized_key(ssh_keys):
     ssh.add_authorized_key(
         remote_public_key, utils.get_paths()['authorized-keys'])
     ssh_peer = {ssh_keys.get_remote('private-address'): remote_public_key}
-    utils.update_config(new_ssh_peers=ssh_peer)
+    utils.update_config(
+        config_path=utils.get_paths()['config'], new_ssh_peers=ssh_peer)
     ssh_keys.remove_state(ssh_keys.states.new_remote_public_key)
 
 
