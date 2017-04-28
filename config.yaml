@@ -3,6 +3,10 @@ options:
     type: string
     description: "The URL of the service."
     default: ""
+  repository-origin:
+    type: string
+    description: "The value of the 'Origin' field of the repository."
+    default: "Ubuntu"
   mirror-uri:
     type: string
     description: |

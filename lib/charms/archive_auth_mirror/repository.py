@@ -8,13 +8,14 @@ from archive_auth_mirror.utils import get_paths, update_config
 
 
 def configure_reprepro(mirror_uri, mirror_archs, mirror_key_fingerprint,
-                       sign_key_fingerprint, sign_key_passphrase,
+                       sign_key_fingerprint, sign_key_passphrase, origin,
                        get_paths=get_paths):
     """Create reprepro configuration files."""
     paths = get_paths()
     context = split_repository_uri(mirror_uri)
     context.update(
-        {'archs': mirror_archs,
+        {'origin': origin,
+         'archs': mirror_archs,
          'mirror_key': mirror_key_fingerprint,
          'sign_key': sign_key_fingerprint,
          'sign_script': paths['bin'] / 'reprepro-sign-helper'})

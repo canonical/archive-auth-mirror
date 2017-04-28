@@ -9,7 +9,8 @@ from archive_auth_mirror.utils import get_paths
 
 
 REQUIRED_OPTIONS = frozenset(
-    ['mirror-uri', 'mirror-archs', 'mirror-gpg-key', 'sign-gpg-key'])
+    ['mirror-uri', 'mirror-archs', 'mirror-gpg-key', 'sign-gpg-key',
+     'repository-origin'])
 
 
 SCRIPTS = ('mirror-archive', 'manage-user', 'reprepro-sign-helper')

@@ -131,7 +131,8 @@ class HaveRequiredConfigsTest(TestCase):
             'mirror-uri': 'http://example.com/ubuntu precise main',
             'mirror-archs': 'amd64 i386',
             'mirror-gpg-key': 'aabbcc',
-            'sign-gpg-key': 'ddeeff'}
+            'sign-gpg-key': 'ddeeff',
+            'repository-origin': 'Ubuntu'}
         self.assertTrue(have_required_config(config))
 
     def test_option_not_present(self):
@@ -140,7 +141,8 @@ class HaveRequiredConfigsTest(TestCase):
         config = {
             'mirror-uri': 'http://example.com/ubuntu precise main',
             'mirror-archs': 'amd64 i386',
-            'sign-gpg-key': 'ddeeff'}
+            'sign-gpg-key': 'ddeeff',
+            'repository-origin': 'Ubuntu'}
         self.assertFalse(have_required_config(config))
 
     def test_option_none(self):
@@ -149,7 +151,8 @@ class HaveRequiredConfigsTest(TestCase):
             'mirror-uri': 'http://example.com/ubuntu precise main',
             'mirror-archs': None,
             'mirror-gpg-key': 'aabbcc',
-            'sign-gpg-key': 'ddeeff'}
+            'sign-gpg-key': 'ddeeff',
+            'repository-origin': 'Ubuntu'}
         self.assertFalse(have_required_config(config))
 
     def test_option_empty_string(self):
@@ -158,5 +161,6 @@ class HaveRequiredConfigsTest(TestCase):
             'mirror-uri': 'http://example.com/ubuntu precise main',
             'mirror-archs': 'amd64 i386',
             'mirror-gpg-key': '',
-            'sign-gpg-key': 'ddeeff'}
+            'sign-gpg-key': 'ddeeff',
+            'repository-origin': 'Ubuntu'}
         self.assertFalse(have_required_config(config))
