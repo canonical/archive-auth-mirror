@@ -21,13 +21,15 @@ class ConfigureRepreproTest(CharmTest):
         paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
-            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret',
+            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
             get_paths=lambda: paths)
         self.assertEqual(
             textwrap.dedent(
                 '''\
                 Codename: xenial
-                Label: xenial archive
+                Origin: Ubuntu
+                Suite: xenial
+                Label: Ubuntu
                 Components: main universe
                 Architectures: i386 amd64
                 SignWith: ! {}/reprepro-sign-helper
@@ -57,7 +59,7 @@ class DisableMirroringTest(CharmTest):
         paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
-            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret',
+            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
             get_paths=lambda: paths)
 
         config = paths['config']
