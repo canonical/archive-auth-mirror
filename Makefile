@@ -9,6 +9,13 @@ CHARM_URI = cs:~landscape/$(CHARM_NAME)
 help: ## Print help about available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+
+.PHONY: install-deps
+install-deps: TEST_DEPS = tox
+install-deps: TEST_DEPS += $(shell python3 -c 'import yaml; print(" ".join(yaml.load(open("layer.yaml"))["options"]["basic"]["packages"]))')
+install-deps:  ## Install test dependency deb packages
+	@sudo apt install $(TEST_DEPS)
+
 .PHONY: charm-build
 charm-build: REV_HASH = $(shell git rev-parse HEAD)
 charm-build: export INTERFACE_PATH = interfaces
