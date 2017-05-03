@@ -11,7 +11,7 @@ help: ## Print help about available targets
 
 
 .PHONY: install-deps
-install-deps: TEST_DEPS = tox
+install-deps: TEST_DEPS = tox charm
 install-deps: TEST_DEPS += $(shell python3 -c 'import yaml; print(" ".join(yaml.load(open("layer.yaml"))["options"]["basic"]["packages"]))')
 install-deps:  ## Install test dependency deb packages
 	@sudo apt install $(TEST_DEPS)
