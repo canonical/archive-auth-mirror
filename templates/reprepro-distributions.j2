@@ -1,7 +1,10 @@
 Codename: {{ suite }}
-Origin: {{ origin }}
 Suite: {{ suite }}
+{%- if version %}
+Version: {{ version }}
+{%- endif %}
 Label: {{ origin }}
+Origin: {{ origin }}
 Components: {{ components }}
 Architectures: {{ archs }}
 SignWith: ! {{ sign_script }}

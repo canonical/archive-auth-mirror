@@ -22,14 +22,15 @@ class ConfigureRepreproTest(CharmTest):
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
             uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
-            get_paths=lambda: paths)
+            '16.04', get_paths=lambda: paths)
         self.assertEqual(
             textwrap.dedent(
                 '''\
                 Codename: xenial
-                Origin: Ubuntu
                 Suite: xenial
+                Version: 16.04
                 Label: Ubuntu
+                Origin: Ubuntu
                 Components: main universe
                 Architectures: i386 amd64
                 SignWith: ! {}/reprepro-sign-helper
@@ -51,6 +52,27 @@ class ConfigureRepreproTest(CharmTest):
             {'suite': 'xenial', 'sign-key-id': 'CDCDCDCD'},
             yaml.load(paths['config'].read_text()))
 
+    def test_configuration_no_version(self):
+        """The 'Version' is omitted if empty."""
+        paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
+        uri = 'https://user:pass@example.com/ubuntu xenial main universe'
+        configure_reprepro(
+            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
+            '', get_paths=lambda: paths)
+        self.assertEqual(
+            textwrap.dedent(
+                '''\
+                Codename: xenial
+                Suite: xenial
+                Label: Ubuntu
+                Origin: Ubuntu
+                Components: main universe
+                Architectures: i386 amd64
+                SignWith: ! {}/reprepro-sign-helper
+                Update: update-repo
+                '''.format(paths['bin'])),
+            (paths['reprepro-conf'] / 'distributions').read_text())
+
 
 class DisableMirroringTest(CharmTest):
 
@@ -60,7 +82,7 @@ class DisableMirroringTest(CharmTest):
         uri = 'https://user:pass@example.com/ubuntu xenial main universe'
         configure_reprepro(
             uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
-            get_paths=lambda: paths)
+            '16.04', get_paths=lambda: paths)
 
         config = paths['config']
         self.assertTrue(config.exists())

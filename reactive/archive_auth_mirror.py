@@ -78,10 +78,11 @@ def config_set():
     fingerprints = gpg.import_keys(
         config['mirror-gpg-key'], config['sign-gpg-key'])
     sign_gpg_passphrase = config.get('sign-gpg-passphrase', '').strip()
+    repository_version = config.get('repository-version', '').strip()
     repository.configure_reprepro(
         config['mirror-uri'].strip(), config['mirror-archs'].strip(),
         fingerprints.mirror, fingerprints.sign, sign_gpg_passphrase,
-        config.get('repository-origin', ''))
+        config['repository-origin'].strip(), repository_version)
     # export the public key used to sign the repository
     _export_sign_key(fingerprints.sign)
     hookenv.status_set('active', 'Mirroring configured')

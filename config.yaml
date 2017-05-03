@@ -7,6 +7,10 @@ options:
     type: string
     description: "The value of the 'Origin' field of the repository."
     default: "Ubuntu"
+  repository-version:
+    type: string
+    description: "The value of the 'Version' field of the repository."
+    default: ""
   mirror-uri:
     type: string
     description: |
