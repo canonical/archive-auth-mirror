@@ -27,10 +27,12 @@ def create_ssh_key():
     ssh.create_key(utils.get_paths()['ssh-key'])
 
 
-@when(charm_state('installed'), 'nginx.available')
+@when(charm_state('installed'),
+      'nginx.available',
+      'basic-auth-check.changed')
 @when_not(charm_state('static-serve.configured'))
-def configure_static_service():
-    _configure_static_serve()
+def configure_static_service(basic_auth_check):
+    _configure_static_serve(auth_backends=basic_auth_check.backends())
     set_state(charm_state('static-serve.configured'))
 
 
@@ -64,8 +66,26 @@ def add_authorized_key(ssh_keys):
 
 
 @when(charm_state('static-serve.configured'), 'config.changed.mirror-uri')
-def config_mirror_uri_changed():
-    _configure_static_serve()
+@when_not('basic-auth-check.available')
+def config_mirror_uri_changed_no_basic_auth(basic_auth_check):
+    _configure_static_serve(auth_backends=[])
+
+
+@when(charm_state('static-serve.configured'), 'config.changed.mirror-uri')
+@when('basic-auth-check.available')
+def config_mirror_uri_changed_basic_auth(basic_auth_check):
+    _configure_static_serve(auth_backends=basic_auth_check.backends())
+
+
+@when(charm_state('static-serve.configured'), 'basic-auth-check.changed')
+def config_basic_auth_check_changed(basic_auth_check):
+    _configure_static_serve(auth_backends=basic_auth_check.backends())
+
+
+@when_not('basic-auth-check.available')
+@when('basic-auth-check.changed')
+def config_basic_auth_check_removed(basic_auth_check):
+    _configure_static_serve(auth_backends=[])
 
 
 @when(charm_state('installed'), 'config.changed')
@@ -110,9 +130,9 @@ def remove_cron():
     remove_state(charm_state('job.enabled'))
 
 
-def _configure_static_serve():
+def _configure_static_serve(auth_backends=None):
     """Configure the static file serve."""
-    vhost_config = setup.get_virtualhost_config()
+    vhost_config = setup.get_virtualhost_config(auth_backends=auth_backends)
     configure_site(
         'archive-auth-mirror', 'nginx-static.j2', **vhost_config)
 

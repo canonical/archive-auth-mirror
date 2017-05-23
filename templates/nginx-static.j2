@@ -1,3 +1,11 @@
+{%- if auth_backends %}
+upstream auth_backend {
+  {%- for host, port in auth_backends %}
+    server {{ host }}:{{ port }};
+  {%- endfor %}
+}
+{% endif %}
+
 server {
     server_name {{ domain }};
 
@@ -7,9 +15,20 @@ server {
     root {{ document_root }};
 
     location / {
+      {%- if auth_backends %}
+        auth_request /auth;
+      {%- else %}
         auth_basic "{{ domain }} archive";
         auth_basic_user_file {{ basic_auth_file }};
+      {%- endif %}
         autoindex on;
     }
+
+  {% if auth_backends %}
+    location = /auth {
+        internal;
+        proxy_pass http://auth_backend/auth-check/;
+    }
+  {%- endif %}
 }
 

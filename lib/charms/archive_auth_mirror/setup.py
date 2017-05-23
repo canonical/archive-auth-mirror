@@ -22,13 +22,14 @@ def get_virtualhost_name(hookenv=hookenv):
     return service_url or hookenv.unit_public_ip()
 
 
-def get_virtualhost_config(hookenv=hookenv):
+def get_virtualhost_config(auth_backends=None, hookenv=hookenv):
     """Return the configuration for the static virtuahost."""
     paths = get_paths()
     domain = get_virtualhost_name(hookenv=hookenv)
     return {
         'domain': domain,
         'document_root': str(paths['static']),
+        'auth_backends': auth_backends or [],
         'basic_auth_file': str(paths['basic-auth'])}
 
 

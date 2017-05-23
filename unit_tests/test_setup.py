@@ -43,6 +43,20 @@ class GetVirtualhostConfigTest(CharmTest):
         self.assertEqual(
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
+             'auth_backends': [],
+             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
+            config)
+
+    def test_virtualhost_config_auth_backends(self):
+        """If backends are passed, they're included in the vhost config."""
+        hookenv = FakeHookEnv()
+        auth_backends = [('1.2.3.4', '8080'), ('5.6.7.8', '9090')]
+        config = get_virtualhost_config(
+            auth_backends=auth_backends, hookenv=hookenv)
+        self.assertEqual(
+            {'domain': '1.2.3.4',
+             'document_root': '/srv/archive-auth-mirror/static',
+             'auth_backends': auth_backends,
              'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
             config)
 
