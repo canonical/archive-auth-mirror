@@ -34,7 +34,12 @@ def install():
 @when(charm_state('installed'))
 @only_once
 def create_ssh_key():
-    ssh.create_key(utils.get_paths()['ssh-key'])
+    path = utils.get_paths()['ssh-key']
+    if not path.exists():
+        # only_once doesn't protect the handler from running if the line in
+        # source code changes (so it can run again in an upgrade-charm hook)
+
+        ssh.create_key(path)
 
 
 @when(charm_state('installed'),
