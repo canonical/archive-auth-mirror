@@ -1,12 +1,22 @@
 """Install and configure archive-auth-mirror to mirror an Ubuntu repository."""
 
+import yaml
+
 from charmhelpers.core import hookenv
 
-from charms.reactive import when, when_not, set_state, remove_state, only_once
-
+from charms.reactive import (
+    when,
+    when_not,
+    set_state,
+    remove_state,
+    only_once,
+)
 from charms.layer.nginx import configure_site
+from charms.archive_auth_mirror import (
+    repository,
+    setup,
+)
 
-from charms.archive_auth_mirror import repository, setup
 from archive_auth_mirror import gpg, cron, ssh, utils
 
 
@@ -41,6 +51,8 @@ def configure_static_service(basic_auth_check):
 @when_not(charm_state('website.configured'))
 def configure_website(website):
     website.configure(port=hookenv.config()['port'])
+    services = setup.get_frontend_services_config()
+    website.set_remote(services=yaml.dump(services))
     set_state(charm_state('website.configured'))
 
 
