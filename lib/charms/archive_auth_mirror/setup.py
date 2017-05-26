@@ -33,22 +33,6 @@ def get_virtualhost_config(auth_backends=None, hookenv=hookenv):
         'basic_auth_file': str(paths['basic-auth'])}
 
 
-def get_frontend_services_config(hookenv=hookenv):
-    """Return the config for the website relation frontend service """
-    port = hookenv.config()['port']
-    server_name = '{}-{}'.format(
-        hookenv.local_unit().replace('/', '-'), port)
-    return [
-        {'service_name': hookenv.service_name(),
-         'service_host': '0.0.0.0',
-         'service_port': port,
-         'service_options': [
-             'mode http', 'balance leastconn', 'cookie SRVNAME insert'],
-         'servers': [
-             [server_name, hookenv.unit_private_ip(), port,
-              'maxconn 100 cookie S{i} check']]}]
-
-
 def install_resources(root_dir=None):
     """Create tree structure and install resources from the charm."""
     paths = get_paths(root_dir=root_dir)

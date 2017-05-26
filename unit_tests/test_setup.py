@@ -13,7 +13,6 @@ from charmtest import CharmTest
 from charms.archive_auth_mirror.setup import (
     get_virtualhost_name,
     get_virtualhost_config,
-    get_frontend_services_config,
     install_resources,
     create_script_file,
     have_required_config,
@@ -60,24 +59,6 @@ class GetVirtualhostConfigTest(CharmTest):
              'auth_backends': auth_backends,
              'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
             config)
-
-
-class GetFrontendServicesConfig(CharmTest):
-
-    def test_frontend_config(self):
-        """get_frontend_services_config returns frontend services config."""
-        hookenv = FakeHookEnv(config={'port': '80'})
-        services = get_frontend_services_config(hookenv=hookenv)
-        self.assertEqual(
-            [{'service_name': 'service',
-              'service_host': '0.0.0.0',
-              'service_port': '80',
-              'service_options': [
-                  'mode http', 'balance leastconn', 'cookie SRVNAME insert'],
-              'servers': [
-                  ['service-0-80', '5.6.7.8', '80',
-                   'maxconn 100 cookie S{i} check']]}],
-            services)
 
 
 class InstallResourcesTests(CharmTest):
