@@ -35,3 +35,13 @@ options:
     type: string
     description: "Passphrase for the sign-gpg-key."
     default: ""
+  auth-cache-time:
+    type: string
+    description: |
+      Caching time for positive auth responses.
+
+      This key is only considered when the application is related to
+      basic-auth-service, which provides external authorization.
+
+      The value can contain the suffixes like "m" or "h" (e.g. "5m").
+    default: ""

@@ -82,6 +82,18 @@ def config_mirror_uri_changed_basic_auth(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
 
 
+@when(charm_state('static-serve.configured'), 'config.changed.auth-cache-time')
+@when_not('basic-auth-check.available')
+def config_auth_cache_time_changed_no_basic_auth(basic_auth_check):
+    _configure_static_serve(auth_backends=[])
+
+
+@when(charm_state('static-serve.configured'), 'config.changed.auth-cache-time')
+@when('basic-auth-check.available')
+def config_auth_cache_time_changed_basic_auth(basic_auth_check):
+    _configure_static_serve(auth_backends=basic_auth_check.backends())
+
+
 @when(charm_state('static-serve.configured'), 'basic-auth-check.changed')
 def config_basic_auth_check_changed(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
@@ -137,7 +149,9 @@ def remove_cron():
 
 def _configure_static_serve(auth_backends=None):
     """Configure the static file serve."""
-    vhost_config = setup.get_virtualhost_config(auth_backends=auth_backends)
+    auth_cache_time = hookenv.config()['auth-cache-time']
+    vhost_config = setup.get_virtualhost_config(
+        auth_backends=auth_backends, auth_cache_time=auth_cache_time)
     configure_site(
         'archive-auth-mirror', 'nginx-static.j2', **vhost_config)
 

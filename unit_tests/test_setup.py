@@ -44,6 +44,7 @@ class GetVirtualhostConfigTest(CharmTest):
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
              'auth_backends': [],
+             'auth_cache_time': None,
              'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
             config)
 
@@ -57,6 +58,19 @@ class GetVirtualhostConfigTest(CharmTest):
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
              'auth_backends': auth_backends,
+             'auth_cache_time': None,
+             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
+            config)
+
+    def test_virtualhost_config_auth_cache_time(self):
+        """If caching time is passed, it's included in the vhost config."""
+        hookenv = FakeHookEnv()
+        config = get_virtualhost_config(auth_cache_time='5m', hookenv=hookenv)
+        self.assertEqual(
+            {'domain': '1.2.3.4',
+             'document_root': '/srv/archive-auth-mirror/static',
+             'auth_backends': [],
+             'auth_cache_time': '5m',
              'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
             config)
 
