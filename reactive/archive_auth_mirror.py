@@ -72,7 +72,7 @@ def add_authorized_key(ssh_keys):
 
 @when(charm_state('static-serve.configured'), 'config.changed.mirror-uri')
 @when_not('basic-auth-check.available')
-def config_mirror_uri_changed_no_basic_auth(basic_auth_check):
+def config_mirror_uri_changed_no_basic_auth():
     _configure_static_serve(auth_backends=[])
 
 
@@ -84,7 +84,7 @@ def config_mirror_uri_changed_basic_auth(basic_auth_check):
 
 @when(charm_state('static-serve.configured'), 'config.changed.auth-cache-time')
 @when_not('basic-auth-check.available')
-def config_auth_cache_time_changed_no_basic_auth(basic_auth_check):
+def config_auth_cache_time_changed_no_basic_auth():
     _configure_static_serve(auth_backends=[])
 
 
