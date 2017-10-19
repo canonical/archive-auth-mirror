@@ -43,5 +43,5 @@ options:
       This key is only considered when the application is related to
       basic-auth-service, which provides external authorization.
 
-      The value can contain the suffixes like "m" or "h" (e.g. "5m").
+      The value can contain suffixes like "m" or "h" (e.g. "5m").
     default: ""
