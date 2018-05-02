@@ -1,8 +1,10 @@
 from charmhelpers.core import hookenv
-from charms.reactive import hook
-from charms.reactive import RelationBase
-from charms.reactive import scopes
-from charms.reactive import bus
+from charms.reactive import (
+    flags,
+    hook,
+    RelationBase,
+    scopes,
+)
 
 
 class SshPeers(RelationBase):
@@ -18,10 +20,10 @@ class SshPeers(RelationBase):
 
     scope = scopes.UNIT
 
-    class states(bus.StateList):
-        connected = bus.State('{relation_name}.connected')
-        local_public_key = bus.State('{relation_name}.local-public-key')
-        new_remote_public_key = bus.State(
+    class states(flags.StateList):
+        connected = flags.State('{relation_name}.connected')
+        local_public_key = flags.State('{relation_name}.local-public-key')
+        new_remote_public_key = flags.State(
             '{relation_name}.new-remote-public-key')
 
     @hook('{peers:ssh-peers}-relation-{joined}')
