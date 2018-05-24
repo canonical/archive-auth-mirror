@@ -25,6 +25,7 @@ options:
       The archs field defaults to "source i386 amd64".
       The version field, if not specified, is omitted.
       The charm is blocked until this config value is provided.
+    default: ""
   sign-gpg-key:
     type: string
     description: "GPG private key for signing the archive."
