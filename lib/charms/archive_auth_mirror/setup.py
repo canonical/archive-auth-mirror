@@ -8,11 +8,7 @@ from charmhelpers.core.templating import render
 from archive_auth_mirror.utils import get_paths
 
 
-REQUIRED_OPTIONS = frozenset(
-    ['mirror-uri', 'mirror-archs', 'mirror-gpg-key', 'sign-gpg-key',
-     'repository-origin'])
-
-
+REQUIRED_OPTIONS = frozenset(['mirrors', 'repository-origin', 'sign-gpg-key'])
 SCRIPTS = ('mirror-archive', 'manage-user', 'reprepro-sign-helper')
 
 
@@ -66,7 +62,9 @@ def create_script_file(name, bindir):
     render('script.j2', str(bindir / name), context, perms=0o755)
 
 
-def have_required_config(config):
-    """Return whether all required config options are set."""
-    return all(
-        config.get(option) not in ('', None) for option in REQUIRED_OPTIONS)
+def missing_options(config):
+    """Return a list of missing required option names if any.
+
+    Return an empty list otherwise.
+    """
+    return [opt for opt in REQUIRED_OPTIONS if config.get(opt) in ('', None)]

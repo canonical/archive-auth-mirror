@@ -1,13 +1,26 @@
 """Install and configure archive-auth-mirror to mirror an Ubuntu repository."""
 
 from charmhelpers.core import hookenv
-
-from charms.reactive import when, when_not, set_state, remove_state, only_once
-
 from charms.layer.nginx import configure_site
+from charms.reactive import (
+    only_once,
+    remove_state,
+    set_state,
+    when,
+    when_not,
+)
 
-from charms.archive_auth_mirror import repository, setup
-from archive_auth_mirror import gpg, cron, ssh, utils
+from charms.archive_auth_mirror import (
+    repository,
+    setup,
+)
+from archive_auth_mirror import (
+    cron,
+    gpg,
+    mirror,
+    ssh,
+    utils,
+)
 
 
 def charm_state(state):
@@ -28,7 +41,6 @@ def create_ssh_key():
     if not path.exists():
         # only_once doesn't protect the handler from running if the line in
         # source code changes (so it can run again in an upgrade-charm hook)
-
         ssh.create_key(path)
 
 
@@ -108,20 +120,22 @@ def config_basic_auth_check_removed(basic_auth_check):
 @when(charm_state('installed'), 'config.changed')
 def config_set():
     config = hookenv.config()
-    if not setup.have_required_config(config):
+    missing_options = setup.missing_options(config)
+    if missing_options:
+        hookenv.status_set(
+            'blocked',
+            'Mirroring is disabled as some configuration options are missing: '
+            '{}'.format(', '.join(missing_options)))
         return
 
-    # configure mirroring
-    fingerprints = gpg.import_keys(
-        config['mirror-gpg-key'], config['sign-gpg-key'])
-    sign_gpg_passphrase = config.get('sign-gpg-passphrase', '').strip()
-    repository_version = config.get('repository-version', '').strip()
+    # Configure mirroring.
+    keyring = gpg.KeyRing()
+    mirrors = mirror.from_config(
+        keyring, config['mirrors'], config['repository-origin'].strip())
     repository.configure_reprepro(
-        config['mirror-uri'].strip(), config['mirror-archs'].strip(),
-        fingerprints.mirror, fingerprints.sign, sign_gpg_passphrase,
-        config['repository-origin'].strip(), repository_version)
-    # export the public key used to sign the repository
-    _export_sign_key(fingerprints.sign)
+        mirrors, config.get('sign-gpg-passphrase', '').strip())
+    # Export the public key used to sign the repository.
+    _export_sign_key(keyring.import_key(config['sign-gpg-key']))
     hookenv.status_set('active', 'Mirroring configured')
 
 

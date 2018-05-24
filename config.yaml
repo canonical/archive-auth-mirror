@@ -7,29 +7,27 @@ options:
     type: string
     description: "The value of the 'Origin' field of the repository."
     default: "Ubuntu"
-  repository-version:
-    type: string
-    description: "The value of the 'Version' field of the repository."
-    default: ""
-  mirror-uri:
+  mirrors:
     type: string
     description: |
-      The URI of the repository to mirror.
-      The format is the following:
+      A YAML describing one or more repositories to mirror.
+      The YAML is structured as a list of maps, with each map including
+      the "deb-line" and "pub-key" mandatory fields, and the "archs" and
+      "version" optional fields . For instance:
 
-      http[s]://[<user>:<pass>@]<hostname>/<path> <suite> <components>
-    default: ""
-  mirror-archs:
-    type: string
-    description: "A space-separated list of architectures to mirror."
-    default: "source i386 amd64"
-  mirror-gpg-key:
-    type: string
-    description: "GPG key for the repository to mirror."
-    default: ""
+        - deb-line: http[s]://[<user>:<pass>@]<hostname>/<path> <suite> <components>
+          pub-key: GPG public key for validating the repository
+          archs: source i386 amd64
+          version: 18.10
+        - deb-line: ...
+          pub-key: ...
+
+      The archs field defaults to "source i386 amd64".
+      The version field, if not specified, is omitted.
+      The charm is blocked until this config value is provided.
   sign-gpg-key:
     type: string
-    description: "GPG key for signing the archive."
+    description: "GPG private key for signing the archive."
     default: ""
   sign-gpg-passphrase:
     type: string

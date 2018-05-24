@@ -1,31 +1,23 @@
 """GnuPG-related functions."""
 
-from collections import namedtuple
-
 import gnupg
 
 from .utils import get_paths
 
 
-Fingerprints = namedtuple('Fingerprints', ['mirror', 'sign'])
+class KeyRing(object):
+    """The key ring is used to import GPG keys and return fingerprints."""
 
+    def __init__(self):
+        homedir = str(get_paths()['gnupghome'])
+        self.gpg = gnupg.GPG(homedir=homedir)
 
-def import_keys(mirror_key, sign_key, gnupghome=None):
-    """Import specified GPG keys returning their fingerprints."""
-    if not gnupghome:
-        gnupghome = str(get_paths()['gnupghome'])
-    gpg = gnupg.GPG(homedir=gnupghome)
-
-    imported_mirror_key = gpg.import_keys(mirror_key)
-    imported_sign_key = gpg.import_keys(sign_key)
-
-    def fingerprint(imported):
-        # only return the last 8 chars of the fingerprint, since that's the
-        # format used by reprepro
+    def import_key(self, key):
+        """Import the given GPG key and return its fingerprint."""
+        imported = self.gpg.import_keys(key)
+        # Only return the last 8 chars of the fingerprint, since that's the
+        # format used by reprepro.
         return imported.results[0]['fingerprint'][-8:]
-
-    return Fingerprints(
-        fingerprint(imported_mirror_key), fingerprint(imported_sign_key))
 
 
 def export_public_key(key_id, path, gnupghome=None):
