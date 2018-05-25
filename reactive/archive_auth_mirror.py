@@ -82,13 +82,13 @@ def add_authorized_key(ssh_keys):
     ssh_keys.remove_state(ssh_keys.states.new_remote_public_key)
 
 
-@when(charm_state('static-serve.configured'), 'config.changed.mirror-uri')
+@when(charm_state('static-serve.configured'), 'config.changed.mirrors')
 @when_not('basic-auth-check.available')
 def config_mirror_uri_changed_no_basic_auth():
     _configure_static_serve(auth_backends=[])
 
 
-@when(charm_state('static-serve.configured'), 'config.changed.mirror-uri')
+@when(charm_state('static-serve.configured'), 'config.changed.mirrors')
 @when('basic-auth-check.available')
 def config_mirror_uri_changed_basic_auth(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
@@ -141,8 +141,7 @@ def config_set():
     hookenv.status_set('active', 'Mirroring configured')
 
 
-@when_not('config.set.mirror-uri', 'config.set.mirror-archs',
-          'config.set.mirror-gpg-key', 'config.set.sign-gpg-key')
+@when_not('config.set.mirrors', 'config.set.sign-gpg-key')
 def config_not_set():
     repository.disable_mirroring()
     hookenv.status_set(
