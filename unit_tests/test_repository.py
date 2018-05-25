@@ -75,7 +75,8 @@ class ConfigureRepreproTest(CharmTest):
         self.assertEqual(
             yaml.load(paths['config'].read_text()),
             {'sign-key-id': 'finger', 'suites': ['xenial', 'sid']})
-        self.assertEqual(paths['sign-passphrase'].open().read(), 'secret')
+        with paths['sign-passphrase'].open() as f:
+            self.assertEqual(f.read(), 'secret')
 
 
 class DisableMirroringTest(CharmTest):
