@@ -132,10 +132,12 @@ def config_set():
     keyring = gpg.KeyRing()
     mirrors = mirror.from_config(
         keyring, config['mirrors'], config['repository-origin'].strip())
+    sign_key_fingerprint = keyring.import_key(config['sign-gpg-key'])
+    sign_key_passphrase = config.get('sign-gpg-passphrase', '').strip()
     repository.configure_reprepro(
-        mirrors, config.get('sign-gpg-passphrase', '').strip())
+        mirrors, sign_key_fingerprint, sign_key_passphrase)
     # Export the public key used to sign the repository.
-    _export_sign_key(keyring.import_key(config['sign-gpg-key']))
+    _export_sign_key(sign_key_fingerprint)
     hookenv.status_set('active', 'Mirroring configured')
 
 

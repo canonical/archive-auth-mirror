@@ -1,13 +1,14 @@
 from pathlib import Path
+from unittest import mock
 
 from charmtest import CharmTest
 
 from archive_auth_mirror.utils import get_paths
 from archive_auth_mirror.gpg import (
-    import_keys,
-    export_public_key,
-    inline_sign,
     detach_sign,
+    export_public_key,
+    KeyRing,
+    inline_sign,
 )
 
 
@@ -105,17 +106,23 @@ FUB99LPi8uvx+QjcHLg=
 '''
 
 
-class ImportKeysTest(CharmTest):
+def make_keyring(homedir):
+    """Create and return a keyring using the given home directory."""
+    paths = {'gnupghome': homedir}
+    with mock.patch('archive_auth_mirror.gpg.get_paths', return_value=paths):
+        return KeyRing()
 
-    def test_import_keys(self):
-        """import_keys imports the mirror and sign keys."""
-        fingerprints = import_keys(
-            PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
-            gnupghome=self.fakes.fs.root.path)
-        # returned fingerprints are 8 characters long
-        self.assertEqual(
-            (PUBLIC_KEY_FINGERPRINT[-8:], SECRET_KEY_FINGERPRINT[-8:]),
-            fingerprints)
+
+class KeyRingTest(CharmTest):
+
+    def setUp(self):
+        super().setUp()
+        self.keyring = make_keyring(self.fakes.fs.root.path)
+
+    def test_import_key(self):
+        """import_key imports the key and returns its fingerprint."""
+        fingerprint = self.keyring.import_key(PUBLIC_KEY_MATERIAL)
+        self.assertEqual(fingerprint, PUBLIC_KEY_FINGERPRINT[-8:])
 
 
 class ExportPublicKeyTest(CharmTest):
@@ -123,12 +130,10 @@ class ExportPublicKeyTest(CharmTest):
     def test_export_public_key(self):
         """export_public_key exports the specified public key."""
         gnupghome = self.fakes.fs.root.path
-        public_key_file = Path(self.fakes.fs.root.path) / 'public.asc'
-        fingerprints = import_keys(
-            PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
-            gnupghome=gnupghome)
-        export_public_key(
-            fingerprints.sign, public_key_file, gnupghome=gnupghome)
+        public_key_file = Path(gnupghome) / 'public.asc'
+        keyring = make_keyring(gnupghome)
+        fingerprint = keyring.import_key(SECRET_KEY_MATERIAL)
+        export_public_key(fingerprint, public_key_file, gnupghome=gnupghome)
         material = public_key_file.read_text()
         self.assertTrue(
             material.startswith('-----BEGIN PGP PUBLIC KEY BLOCK-----'))
@@ -143,17 +148,14 @@ class InlineSignTest(CharmTest):
         paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
         paths['gnupghome'].mkdir(parents=True)
         paths['sign-passphrase'].write_text('')
-
-        fingerprints = import_keys(
-            PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
-            gnupghome=str(paths['gnupghome']))
+        keyring = make_keyring(paths['gnupghome'])
+        fingerprint = keyring.import_key(SECRET_KEY_MATERIAL)
 
         unsigned_file = Path(self.fakes.fs.root.join('unsigned'))
         unsigned_file.write_text('some text to sign')
         inline_sign_file = Path(self.fakes.fs.root.join('signed'))
 
-        inline_sign(
-            fingerprints[1], unsigned_file, inline_sign_file, paths=paths)
+        inline_sign(fingerprint, unsigned_file, inline_sign_file, paths=paths)
 
         signed_content = inline_sign_file.read_text()
         self.assertIn('some text to sign', signed_content)
@@ -167,17 +169,14 @@ class DetachSignTest(CharmTest):
         paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
         paths['gnupghome'].mkdir(parents=True)
         paths['sign-passphrase'].write_text('')
-
-        fingerprints = import_keys(
-            PUBLIC_KEY_MATERIAL, SECRET_KEY_MATERIAL,
-            gnupghome=str(paths['gnupghome']))
+        keyring = make_keyring(paths['gnupghome'])
+        fingerprint = keyring.import_key(SECRET_KEY_MATERIAL)
 
         unsigned_file = Path(self.fakes.fs.root.join('unsigned'))
         unsigned_file.write_text('some text to sign')
         detach_sign_file = Path(self.fakes.fs.root.join('signature'))
 
-        detach_sign(
-            fingerprints[1], unsigned_file, detach_sign_file, paths=paths)
+        detach_sign(fingerprint, unsigned_file, detach_sign_file, paths=paths)
 
         signature = detach_sign_file.read_text()
         self.assertTrue(signature.startswith('-----BEGIN PGP SIGNATURE-----'))

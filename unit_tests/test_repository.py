@@ -1,5 +1,5 @@
 import textwrap
-import unittest
+from unittest import mock
 from pathlib import Path
 
 import yaml
@@ -7,82 +7,82 @@ import yaml
 from charmtest import CharmTest
 
 from archive_auth_mirror.utils import get_paths
+from archive_auth_mirror.mirror import Mirror
 from charms.archive_auth_mirror.repository import (
     configure_reprepro,
     disable_mirroring,
-    split_repository_uri,
 )
+
+
+def make_reprepro_files(root_dir, mirrors):
+    """A tiny wrapper around configure_reprepro with testing paths."""
+    paths = get_paths(root_dir=Path(root_dir))
+    with mock.patch(
+        'charms.archive_auth_mirror.repository.get_paths', return_value=paths
+    ):
+        configure_reprepro(mirrors, sign_key_fingerprint, sign_key_passphrase)
+    return paths
 
 
 class ConfigureRepreproTest(CharmTest):
 
     def test_configuration_files(self):
         """configure_reprepro writes rerepro config files."""
-        paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
-        uri = 'https://user:pass@example.com/ubuntu xenial main universe'
-        configure_reprepro(
-            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
-            '16.04', get_paths=lambda: paths)
+        paths = make_reprepro_files(self.fakes.fs.root.path, mirrors)
         self.assertEqual(
             textwrap.dedent(
                 '''\
                 Codename: xenial
                 Suite: xenial
-                Version: 16.04
+                Version: 18.10
                 Label: Ubuntu
                 Origin: Ubuntu
                 Components: main universe
-                Architectures: i386 amd64
-                SignWith: ! {}/reprepro-sign-helper
-                Update: update-repo
-                '''.format(paths['bin'])),
+                Architectures: source i386 amd64
+                SignWith: ! {bin}/reprepro-sign-helper
+                Update: update-repo-xenial
+
+                Codename: sid
+                Suite: sid
+                Label: Debian
+                Origin: Debian
+                Components: multiverse
+                Architectures: source
+                SignWith: ! {bin}/reprepro-sign-helper
+                Update: update-repo-sid
+
+                '''.format(**paths)),
             (paths['reprepro-conf'] / 'distributions').read_text())
         self.assertEqual(
             textwrap.dedent(
                 '''\
-                Name: update-repo
+                Name: update-repo-xenial
                 Method: https://user:pass@example.com/ubuntu
                 Suite: xenial
                 Components: main universe
-                Architectures: i386 amd64
-                VerifyRelease: ABABABAB
+                Architectures: source i386 amd64
+                VerifyRelease: finger
+
+                Name: update-repo-sid
+                Method: https://user:pass@1.2.3.4/debian
+                Suite: sid
+                Components: multiverse
+                Architectures: source
+                VerifyRelease: finger
+
                 '''),
             (paths['reprepro-conf'] / 'updates').read_text())
         self.assertEqual(
-            {'suite': 'xenial', 'sign-key-id': 'CDCDCDCD'},
-            yaml.load(paths['config'].read_text()))
-
-    def test_configuration_no_version(self):
-        """The 'Version' is omitted if empty."""
-        paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
-        uri = 'https://user:pass@example.com/ubuntu xenial main universe'
-        configure_reprepro(
-            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
-            '', get_paths=lambda: paths)
-        self.assertEqual(
-            textwrap.dedent(
-                '''\
-                Codename: xenial
-                Suite: xenial
-                Label: Ubuntu
-                Origin: Ubuntu
-                Components: main universe
-                Architectures: i386 amd64
-                SignWith: ! {}/reprepro-sign-helper
-                Update: update-repo
-                '''.format(paths['bin'])),
-            (paths['reprepro-conf'] / 'distributions').read_text())
+            yaml.load(paths['config'].read_text()),
+            {'sign-key-id': 'finger', 'suites': ['xenial', 'sid']})
+        self.assertEqual(paths['sign-passphrase'].open().read(), 'secret')
 
 
 class DisableMirroringTest(CharmTest):
 
     def test_disable_mirroring(self):
         """disable_mirroring renames the script config file."""
-        paths = get_paths(root_dir=Path(self.fakes.fs.root.path))
-        uri = 'https://user:pass@example.com/ubuntu xenial main universe'
-        configure_reprepro(
-            uri, 'i386 amd64', 'ABABABAB', 'CDCDCDCD', 'very secret', 'Ubuntu',
-            '16.04', get_paths=lambda: paths)
+        paths = make_reprepro_files(self.fakes.fs.root.path, mirrors)
 
         config = paths['config']
         self.assertTrue(config.exists())
@@ -112,14 +112,24 @@ class DisableMirroringTest(CharmTest):
         self.assertFalse(config.with_suffix('.disabled').exists())
 
 
-class SplitRepositoryUriTest(unittest.TestCase):
-
-    def test_uri(self):
-        """split_repository_uri splits the repository URI into tokens."""
-        tokens = split_repository_uri(
-            'https://user:pass@example.com/ubuntu xenial main universe')
-        self.assertEqual(
-            {'url': 'https://user:pass@example.com/ubuntu',
-             'suite': 'xenial',
-             'components': 'main universe'},
-            tokens)
+mirrors = (
+    Mirror(
+        url='https://user:pass@example.com/ubuntu',
+        suite='xenial',
+        components='main universe',
+        key='finger',
+        archs='source i386 amd64',
+        version='18.10',
+        origin='Ubuntu',
+    ),
+    Mirror(
+        url='https://user:pass@1.2.3.4/debian',
+        suite='sid',
+        components='multiverse',
+        key='finger',
+        archs='source',
+        version='',
+        origin='Debian',
+    ),
+)
+sign_key_fingerprint, sign_key_passphrase = 'finger', 'secret'

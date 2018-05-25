@@ -13,7 +13,7 @@ options:
       A YAML describing one or more repositories to mirror.
       The YAML is structured as a list of maps, with each map including
       the "deb-line" and "pub-key" mandatory fields, and the "archs" and
-      "version" optional fields . For instance:
+      "version" optional fields. For instance:
 
         - deb-line: http[s]://[<user>:<pass>@]<hostname>/<path> <suite> <components>
           pub-key: GPG public key for validating the repository
