@@ -44,12 +44,22 @@ def create_ssh_key():
         ssh.create_key(path)
 
 
-@when(charm_state('installed'),
-      'nginx.available',
-      'basic-auth-check.changed')
+@when('basic-auth-check.joined')
+def reset_static_service(basic_auth_check):
+    remove_state(charm_state('static-serve.configured'))
+
+
+@when(charm_state('installed'), 'nginx.available', 'basic-auth-check.changed')
 @when_not(charm_state('static-serve.configured'))
 def configure_static_service(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
+    set_state(charm_state('static-serve.configured'))
+
+
+@when(charm_state('installed'), 'nginx.available')
+@when_not(charm_state('static-serve.configured'))
+def configure_static_service_no_basic_auth_check():
+    _configure_static_serve(auth_backends=[])
     set_state(charm_state('static-serve.configured'))
 
 
