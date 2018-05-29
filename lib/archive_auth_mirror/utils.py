@@ -53,12 +53,12 @@ def get_config(config_path=None):
         return yaml.load(fh)
 
 
-def update_config(config_path=None, suite=None, sign_key_id=None,
+def update_config(config_path=None, suites=(), sign_key_id=None,
                   new_ssh_peers=None):
     """Update the config with the given parameters."""
     config = get_config(config_path=config_path)
-    if suite is not None:
-        config['suite'] = suite
+    if suites:
+        config['suites'] = suites
     if sign_key_id is not None:
         config['sign-key-id'] = sign_key_id
     if new_ssh_peers is not None:

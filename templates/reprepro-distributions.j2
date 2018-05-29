@@ -1,12 +1,13 @@
-Codename: {{ suite }}
-Suite: {{ suite }}
-{%- if version %}
-Version: {{ version }}
+{% for mirror in mirrors %}Codename: {{ mirror.suite }}
+Suite: {{ mirror.suite }}
+{%- if mirror.version %}
+Version: {{ mirror.version }}
 {%- endif %}
-Label: {{ origin }}
-Origin: {{ origin }}
-Components: {{ components }}
-Architectures: {{ archs }}
+Label: {{ mirror.origin }}
+Origin: {{ mirror.origin }}
+Components: {{ mirror.components }}
+Architectures: {{ mirror.archs }}
 SignWith: ! {{ sign_script }}
-Update: update-repo
+Update: update-repo-{{ mirror.suite }}
 
+{% endfor %}

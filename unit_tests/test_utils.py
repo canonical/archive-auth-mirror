@@ -56,18 +56,21 @@ class UpdateConfigTest(CharmTest):
 
     def test_no_config(self):
         """update_config creates the config file if not present."""
-        update_config(config_path=self.config_path, suite='precise')
+        update_config(config_path=self.config_path, suites=['bionic'])
         self.assertTrue(self.config_path.exists())
-        self.assertEqual(
-            {'suite': 'precise'}, get_config(config_path=self.config_path))
+        config = get_config(config_path=self.config_path)
+        self.assertEqual(config, {'suites': ['bionic']})
 
     def test_update_existing(self):
         """update_config updates the config file if it exists."""
-        update_config(config_path=self.config_path, suite='precise')
+        update_config(
+            config_path=self.config_path, suites=['xenial', 'bionic'])
         update_config(config_path=self.config_path, sign_key_id='AABBCC')
-        self.assertEqual(
-            {'suite': 'precise', 'sign-key-id': 'AABBCC'},
-            get_config(config_path=self.config_path))
+        config = get_config(config_path=self.config_path)
+        self.assertEqual(config, {
+            'suites': ['xenial', 'bionic'],
+            'sign-key-id': 'AABBCC',
+        })
 
     def test_update_ssh_peers(self):
         """update_config adds new ssh-peers."""

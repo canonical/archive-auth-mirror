@@ -11,11 +11,11 @@ from testtools.matchers import (
 from charmtest import CharmTest
 
 from charms.archive_auth_mirror.setup import (
+    create_script_file,
     get_virtualhost_name,
     get_virtualhost_config,
     install_resources,
-    create_script_file,
-    have_required_config,
+    missing_options,
 )
 
 from fakes import FakeHookEnv
@@ -151,44 +151,43 @@ class CreateScriptFileTest(CharmTest):
         self.assertEqual(0o100755, script.stat().st_mode)
 
 
-class HaveRequiredConfigsTest(TestCase):
+class MissingOptionsTest(TestCase):
 
     def test_all_options(self):
-        """If all required options are set, the function returns True."""
+        """If all required options are set, an empty list is returned."""
         config = {
-            'mirror-uri': 'http://example.com/ubuntu precise main',
-            'mirror-archs': 'amd64 i386',
-            'mirror-gpg-key': 'aabbcc',
-            'sign-gpg-key': 'ddeeff',
-            'repository-origin': 'Ubuntu'}
-        self.assertTrue(have_required_config(config))
+            'mirrors': 'some mirrors',
+            'repository-origin': 'Ubuntu',
+            'sign-gpg-key': 'mykey',
+        }
+        self.assertEqual(missing_options(config), [])
 
     def test_option_not_present(self):
-        """If an option is not present, the function returns False."""
+        """Names of options not included are returned."""
         # no mirror-gpg-key
         config = {
-            'mirror-uri': 'http://example.com/ubuntu precise main',
-            'mirror-archs': 'amd64 i386',
-            'sign-gpg-key': 'ddeeff',
-            'repository-origin': 'Ubuntu'}
-        self.assertFalse(have_required_config(config))
+            'mirrors': 'some mirrors',
+            'sign-gpg-key': 'mykey',
+        }
+        self.assertEqual(missing_options(config), ['repository-origin'])
 
     def test_option_none(self):
-        """If an option has a None value, the function returns False."""
+        """Names of None options are returned."""
+        # no mirror-gpg-key
         config = {
-            'mirror-uri': 'http://example.com/ubuntu precise main',
-            'mirror-archs': None,
-            'mirror-gpg-key': 'aabbcc',
-            'sign-gpg-key': 'ddeeff',
-            'repository-origin': 'Ubuntu'}
-        self.assertFalse(have_required_config(config))
+            'mirrors': None,
+            'repository-origin': 'Ubuntu',
+            'sign-gpg-key': None,
+        }
+        missing = sorted(missing_options(config))
+        self.assertEqual(list(missing), ['mirrors', 'sign-gpg-key'])
 
     def test_option_empty_string(self):
-        """If an option is an empty string, the function returns False."""
+        """Names of empty options are returned."""
+        # no mirror-gpg-key
         config = {
-            'mirror-uri': 'http://example.com/ubuntu precise main',
-            'mirror-archs': 'amd64 i386',
-            'mirror-gpg-key': '',
-            'sign-gpg-key': 'ddeeff',
-            'repository-origin': 'Ubuntu'}
-        self.assertFalse(have_required_config(config))
+            'mirrors': 'some mirrors',
+            'repository-origin': 'Ubuntu',
+            'sign-gpg-key': '',
+        }
+        self.assertEqual(missing_options(config), ['sign-gpg-key'])

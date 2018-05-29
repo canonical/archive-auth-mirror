@@ -1,7 +1,8 @@
-Name: update-repo
-Method: {{ url }}
-Suite: {{ suite }}
-Components: {{ components }}
-Architectures: {{ archs }}
-VerifyRelease: {{ mirror_key }}
+{% for mirror in mirrors %}Name: update-repo-{{ mirror.suite }}
+Method: {{ mirror.url }}
+Suite: {{ mirror.suite }}
+Components: {{ mirror.components }}
+Architectures: {{ mirror.archs }}
+VerifyRelease: {{ mirror.key }}
 
+{% endfor %}
