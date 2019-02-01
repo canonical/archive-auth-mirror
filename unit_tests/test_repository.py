@@ -1,3 +1,4 @@
+import tempfile
 import textwrap
 from unittest import mock
 from pathlib import Path
@@ -7,6 +8,7 @@ import yaml
 from charmtest import CharmTest
 
 from archive_auth_mirror.utils import get_paths
+from archive_auth_mirror.scripts.reprepro_sign_helper import patch_release_file
 from archive_auth_mirror.mirror import Mirror
 from charms.archive_auth_mirror.repository import (
     configure_reprepro,
@@ -77,6 +79,23 @@ class ConfigureRepreproTest(CharmTest):
             {'sign-key-id': 'finger', 'suites': ['xenial', 'sid']})
         with paths['sign-passphrase'].open() as f:
             self.assertEqual(f.read(), 'secret')
+
+
+class MiscRepositoryTests(CharmTest):
+
+    def test_insert_packages_require_authorization(self):
+        with tempfile.NamedTemporaryFile('w', delete=False) as f:
+            f.write('Origin: anOrigin\nMD5Sum:\n')
+        release_path = Path(f.name)
+        self.addCleanup(release_path.unlink)
+        patch_release_file(release_path)
+        with release_path.open() as result_file:
+            result = result_file.readlines()
+
+        self.assertEqual("Origin: anOrigin\n", result[0])
+        self.assertEqual("Packages-Require-Authorization: yes\n", result[1])
+        self.assertEqual("MD5Sum:\n", result[2])
+        self.assertEqual(3, len(result))
 
 
 class DisableMirroringTest(CharmTest):
