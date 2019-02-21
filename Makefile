@@ -1,8 +1,8 @@
 CHARM_NAME = archive-auth-mirror
 CHARM_SERIES = xenial
-CHARM_OUTPUT = build/charm-output
+CHARM_OUTPUT := $(shell mktemp -d)
 RENDERED_CHARM_DIR = $(CHARM_OUTPUT)/$(CHARM_SERIES)/$(CHARM_NAME)
-CHARM_URI = cs:~landscape/$(CHARM_NAME)
+CHARM_URI = cs:~yellow/$(CHARM_NAME)
 
 
 .PHONY: help
@@ -19,7 +19,7 @@ install-deps:  ## Install test dependency deb packages
 
 .PHONY: charm-build
 charm-build: REV_HASH = $(shell git rev-parse HEAD)
-charm-build: export INTERFACE_PATH = interfaces
+charm-build: export CHARM_INTERFACES_DIR = interfaces
 charm-build: ## Build the charm
 	rm -rf $(CHARM_OUTPUT)
 	mkdir -p $(CHARM_OUTPUT)
