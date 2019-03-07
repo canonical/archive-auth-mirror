@@ -23,6 +23,14 @@ from archive_auth_mirror import (
 )
 
 
+# Define options requiring an nginx reconfiguration.
+NGINX_OPTIONS = (
+    'auth-cache-duration',
+    'auth-cache-enabled',
+    'auth-cache-inactivity',
+)
+
+
 def charm_flag(flag):
     """Return a reactive flag name for this charm."""
     return 'archive-auth-mirror.' + flag
@@ -92,28 +100,20 @@ def add_authorized_key(ssh_keys):
     ssh_keys.remove_state(ssh_keys.states.new_remote_public_key)
 
 
-@when(charm_flag('static-serve.configured'), 'config.changed.mirrors')
-@when_not('basic-auth-check.available')
-def config_mirror_uri_changed_no_basic_auth():
-    _configure_static_serve(auth_backends=[])
-
-
-@when(charm_flag('static-serve.configured'), 'config.changed.mirrors')
+@when(charm_flag('static-serve.configured'), 'config.changed')
 @when('basic-auth-check.available')
-def config_mirror_uri_changed_basic_auth(basic_auth_check):
-    _configure_static_serve(auth_backends=basic_auth_check.backends())
+def config_changed_basic_auth(basic_auth_check):
+    cfg = hookenv.config()
+    if any(cfg.changed(option) for option in NGINX_OPTIONS):
+        _configure_static_serve(auth_backends=basic_auth_check.backends())
 
 
-@when(charm_flag('static-serve.configured'), 'config.changed.auth-cache-time')
+@when(charm_flag('static-serve.configured'), 'config.changed')
 @when_not('basic-auth-check.available')
-def config_auth_cache_time_changed_no_basic_auth():
-    _configure_static_serve(auth_backends=[])
-
-
-@when(charm_flag('static-serve.configured'), 'config.changed.auth-cache-time')
-@when('basic-auth-check.available')
-def config_auth_cache_time_changed_basic_auth(basic_auth_check):
-    _configure_static_serve(auth_backends=basic_auth_check.backends())
+def config_changed_no_basic_auth():
+    cfg = hookenv.config()
+    if any(cfg.changed(option) for option in NGINX_OPTIONS):
+        _configure_static_serve(auth_backends=[])
 
 
 @when(charm_flag('static-serve.configured'), 'basic-auth-check.changed')
@@ -174,11 +174,11 @@ def remove_cron():
 
 def _configure_static_serve(auth_backends=None):
     """Configure the static file serve."""
-    auth_cache_time = hookenv.config()['auth-cache-time']
+    cfg = hookenv.config()
     vhost_config = setup.get_virtualhost_config(
-        auth_backends=auth_backends, auth_cache_time=auth_cache_time)
-    configure_site(
-        'archive-auth-mirror', 'nginx-static.j2', **vhost_config)
+        auth_backends, cfg['auth-cache-enabled'], cfg['auth-cache-duration'],
+        cfg['auth-cache-inactivity'])
+    configure_site('archive-auth-mirror', 'nginx-static.j2', **vhost_config)
 
 
 def _export_sign_key(key_id):
