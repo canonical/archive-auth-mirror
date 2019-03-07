@@ -3,9 +3,9 @@
 from charmhelpers.core import hookenv
 from charms.layer.nginx import configure_site
 from charms.reactive import (
+    clear_flag,
     only_once,
-    remove_state,
-    set_state,
+    set_flag,
     when,
     when_not,
 )
@@ -23,18 +23,18 @@ from archive_auth_mirror import (
 )
 
 
-def charm_state(state):
-    """Convenience to return a reactive state name for this charm."""
-    return 'archive-auth-mirror.{}'.format(state)
+def charm_flag(flag):
+    """Return a reactive flag name for this charm."""
+    return 'archive-auth-mirror.' + flag
 
 
-@when_not(charm_state('installed'))
+@when_not(charm_flag('installed'))
 def install():
     setup.install_resources()
-    set_state(charm_state('installed'))
+    set_flag(charm_flag('installed'))
 
 
-@when(charm_state('installed'))
+@when(charm_flag('installed'))
 @only_once
 def create_ssh_key():
     path = utils.get_paths()['ssh-key']
@@ -46,29 +46,29 @@ def create_ssh_key():
 
 @when('basic-auth-check.joined')
 def reset_static_service(basic_auth_check):
-    remove_state(charm_state('static-serve.configured'))
+    clear_flag(charm_flag('static-serve.configured'))
 
 
-@when(charm_state('installed'), 'nginx.available', 'basic-auth-check.changed')
-@when_not(charm_state('static-serve.configured'))
+@when(charm_flag('installed'), 'nginx.available', 'basic-auth-check.changed')
+@when_not(charm_flag('static-serve.configured'))
 def configure_static_service(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
-    set_state(charm_state('static-serve.configured'))
+    set_flag(charm_flag('static-serve.configured'))
 
 
-@when(charm_state('installed'), 'nginx.available')
-@when_not(charm_state('static-serve.configured'))
+@when(charm_flag('installed'), 'nginx.available')
+@when_not(charm_flag('static-serve.configured'))
 def configure_static_service_no_basic_auth_check():
     _configure_static_serve(auth_backends=[])
-    set_state(charm_state('static-serve.configured'))
+    set_flag(charm_flag('static-serve.configured'))
 
 
-@when(charm_state('installed'))
+@when(charm_flag('installed'))
 @when('nginx.available', 'website.available')
-@when_not(charm_state('website.configured'))
+@when_not(charm_flag('website.configured'))
 def configure_website(website):
     website.configure(port=hookenv.config()['port'])
-    set_state(charm_state('website.configured'))
+    set_flag(charm_flag('website.configured'))
 
 
 @when_not('ssh-peers.local-public-key')
@@ -92,31 +92,31 @@ def add_authorized_key(ssh_keys):
     ssh_keys.remove_state(ssh_keys.states.new_remote_public_key)
 
 
-@when(charm_state('static-serve.configured'), 'config.changed.mirrors')
+@when(charm_flag('static-serve.configured'), 'config.changed.mirrors')
 @when_not('basic-auth-check.available')
 def config_mirror_uri_changed_no_basic_auth():
     _configure_static_serve(auth_backends=[])
 
 
-@when(charm_state('static-serve.configured'), 'config.changed.mirrors')
+@when(charm_flag('static-serve.configured'), 'config.changed.mirrors')
 @when('basic-auth-check.available')
 def config_mirror_uri_changed_basic_auth(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
 
 
-@when(charm_state('static-serve.configured'), 'config.changed.auth-cache-time')
+@when(charm_flag('static-serve.configured'), 'config.changed.auth-cache-time')
 @when_not('basic-auth-check.available')
 def config_auth_cache_time_changed_no_basic_auth():
     _configure_static_serve(auth_backends=[])
 
 
-@when(charm_state('static-serve.configured'), 'config.changed.auth-cache-time')
+@when(charm_flag('static-serve.configured'), 'config.changed.auth-cache-time')
 @when('basic-auth-check.available')
 def config_auth_cache_time_changed_basic_auth(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
 
 
-@when(charm_state('static-serve.configured'), 'basic-auth-check.changed')
+@when(charm_flag('static-serve.configured'), 'basic-auth-check.changed')
 def config_basic_auth_check_changed(basic_auth_check):
     _configure_static_serve(auth_backends=basic_auth_check.backends())
 
@@ -127,7 +127,7 @@ def config_basic_auth_check_removed(basic_auth_check):
     _configure_static_serve(auth_backends=[])
 
 
-@when(charm_state('installed'), 'config.changed')
+@when(charm_flag('installed'), 'config.changed')
 def config_set():
     config = hookenv.config()
     missing_options = setup.missing_options(config)
@@ -158,18 +158,18 @@ def config_not_set():
         'blocked', 'Not all required configs set, mirroring is disabled')
 
 
-@when_not(charm_state('job.enabled'))
+@when_not(charm_flag('job.enabled'))
 @when('leadership.is_leader')
 def install_cron():
     cron.install_crontab()
-    set_state(charm_state('job.enabled'))
+    set_flag(charm_flag('job.enabled'))
 
 
 @when_not('leadership.is_leader')
-@when(charm_state('job.enabled'))
+@when(charm_flag('job.enabled'))
 def remove_cron():
     cron.remove_crontab()
-    remove_state(charm_state('job.enabled'))
+    clear_flag(charm_flag('job.enabled'))
 
 
 def _configure_static_serve(auth_backends=None):
