@@ -34,13 +34,22 @@ options:
     type: string
     description: "Passphrase for the sign-gpg-key."
     default: ""
-  auth-cache-time:
-    type: string
+  auth-cache-enabled:
+    type: boolean
     description: |
-      Caching time for positive auth responses.
-
-      This key is only considered when the application is related to
-      basic-auth-service, which provides external authorization.
-
-      The value can contain suffixes like "m" or "h" (e.g. "5m").
-    default: ""
+      Whether authorization caching is enabled.
+      When enabled, both successful and unauthorized responses from the
+      auth backend are cached. The cache expires or is deleted based on
+      the "auth-cache-duration" and "auth-cache-inactivity" options below.
+      Even when this option is set to true, caching is really only enabled
+      when this application is related to an auth backend, like
+      esm-auth-server.
+    default: false
+  auth-cache-duration:
+    type: string
+    description: Cache duration before expiration, like "15m" or "1h".
+    default: 1h
+  auth-cache-inactivity:
+    type: string
+    description: Cache inactivity before invalidation, like "15m" or "1h".
+    default: 10m
