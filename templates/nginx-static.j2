@@ -39,7 +39,7 @@ server {
     location = /auth {
         internal;
       {%- if auth_cache_enabled %}
-        # Activate cache, for both ok and unauthorized auth repsonses.
+        # Activate cache, for both ok and unauthorized auth responses.
         # This way we avoid contacting the contracts service for every
         # package when executing "apt upgrade". The cache key is the
         # HTTP basic auth header.

@@ -39,12 +39,14 @@ class GetVirtualhostConfigTest(CharmTest):
     def test_virtualhost_config(self):
         """get_virtualhost_config returns the config for the virtualhost."""
         hookenv = FakeHookEnv()
-        config = get_virtualhost_config(hookenv=hookenv)
+        config = get_virtualhost_config([], False, "", "", hookenv=hookenv)
         self.assertEqual(
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
              'auth_backends': [],
-             'auth_cache_time': None,
+             'auth_cache_enabled': False,
+             'auth_cache_duration': "",
+             'auth_cache_inactivity': "",
              'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
             config)
 
@@ -53,24 +55,28 @@ class GetVirtualhostConfigTest(CharmTest):
         hookenv = FakeHookEnv()
         auth_backends = [('1.2.3.4', '8080'), ('5.6.7.8', '9090')]
         config = get_virtualhost_config(
-            auth_backends=auth_backends, hookenv=hookenv)
+            auth_backends, False, "", "", hookenv=hookenv)
         self.assertEqual(
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
              'auth_backends': auth_backends,
-             'auth_cache_time': None,
+             'auth_cache_enabled': False,
+             'auth_cache_duration': "",
+             'auth_cache_inactivity': "",
              'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
             config)
 
     def test_virtualhost_config_auth_cache_time(self):
         """If caching time is passed, it's included in the vhost config."""
         hookenv = FakeHookEnv()
-        config = get_virtualhost_config(auth_cache_time='5m', hookenv=hookenv)
+        config = get_virtualhost_config([], True, "1h", "5m", hookenv=hookenv)
         self.assertEqual(
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
              'auth_backends': [],
-             'auth_cache_time': '5m',
+             'auth_cache_enabled': True,
+             'auth_cache_duration': "1h",
+             'auth_cache_inactivity': "5m",
              'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
             config)
 
