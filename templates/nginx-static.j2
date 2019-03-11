@@ -1,10 +1,13 @@
 {%- if auth_backends %}
-
-{%- if auth_cache_time %}
-proxy_cache_path /var/lib/nginx/proxy/cache levels=1:2 keys_zone=auth:50m;
+{%- if auth_cache_enabled %}
+# Set up a disk cache with a memory zone of 50MB, which can
+# store about 400k keys. If the cache data is not accessed
+# in the last {{ auth_cache_inactivity }}, then the cache is removed.
+proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=auth:50m inactive={{ auth_cache_inactivity }} use_temp_path=off;
 {% endif %}
 
 upstream auth_backend {
+    # Define authentication backends, usually instances of esm-auth-server.
   {%- for host, port in auth_backends %}
     server {{ host }}:{{ port }};
   {%- endfor %}
@@ -13,33 +16,39 @@ upstream auth_backend {
 
 server {
     server_name {{ domain }};
-
     listen {{ port }};
     listen [::]:{{ port }};
 
     root {{ document_root }};
 
-    location / {
+    location /ubuntu/pool/ {
+        autoindex on;
       {%- if auth_backends %}
         auth_request /auth;
       {%- else %}
         auth_basic "{{ domain }} archive";
         auth_basic_user_file {{ basic_auth_file }};
       {%- endif %}
+    }
+
+    location / {
         autoindex on;
     }
 
   {% if auth_backends %}
     location = /auth {
         internal;
+      {%- if auth_cache_enabled %}
+        # Activate cache, for both ok and unauthorized auth responses.
+        # This way we avoid contacting the contracts service for every
+        # package when executing "apt upgrade". The cache key is the
+        # HTTP basic auth header.
+        proxy_cache auth;
+        proxy_cache_valid 200 401 {{ auth_cache_duration }};
+        proxy_cache_key $http_authorization;
+      {%- endif %}
         proxy_pass http://auth_backend/auth-check/;
         proxy_set_header Original-URI $request_uri;
-      {%- if auth_cache_time %}
-        proxy_cache auth;
-        proxy_cache_key $http_authorization;
-        proxy_cache_methods GET;
-        proxy_cache_valid 200 {{ auth_cache_time }};
-      {%- endif %}
     }
   {%- endif %}
 }

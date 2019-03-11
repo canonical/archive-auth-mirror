@@ -18,8 +18,9 @@ def get_virtualhost_name(hookenv=hookenv):
     return service_url or hookenv.unit_public_ip()
 
 
-def get_virtualhost_config(auth_backends=None, auth_cache_time=None,
-                           hookenv=hookenv):
+def get_virtualhost_config(
+        auth_backends, auth_cache_enabled, auth_cache_duration,
+        auth_cache_inactivity, hookenv=hookenv):
     """Return the configuration for the static virtuahost."""
     paths = get_paths()
     domain = get_virtualhost_name(hookenv=hookenv)
@@ -27,7 +28,9 @@ def get_virtualhost_config(auth_backends=None, auth_cache_time=None,
         'domain': domain,
         'document_root': str(paths['static']),
         'auth_backends': auth_backends or [],
-        'auth_cache_time': auth_cache_time,
+        'auth_cache_enabled': auth_cache_enabled,
+        'auth_cache_duration': auth_cache_duration,
+        'auth_cache_inactivity': auth_cache_inactivity,
         'basic_auth_file': str(paths['basic-auth'])}
 
 
