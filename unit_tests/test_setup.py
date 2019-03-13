@@ -39,7 +39,13 @@ class GetVirtualhostConfigTest(CharmTest):
     def test_virtualhost_config(self):
         """get_virtualhost_config returns the config for the virtualhost."""
         hookenv = FakeHookEnv()
-        config = get_virtualhost_config([], False, "", "", hookenv=hookenv)
+        auth_backends = []
+        resource_name = 'esm'
+        auth_cache_enabled = False
+        auth_cache_duration = auth_cache_inactivity = ""
+        config = get_virtualhost_config(
+            auth_backends, resource_name, auth_cache_enabled,
+            auth_cache_duration, auth_cache_inactivity, hookenv=hookenv)
         self.assertEqual(
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
@@ -47,15 +53,20 @@ class GetVirtualhostConfigTest(CharmTest):
              'auth_cache_enabled': False,
              'auth_cache_duration': "",
              'auth_cache_inactivity': "",
-             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
+             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth',
+             'resource_name': 'esm'},
             config)
 
     def test_virtualhost_config_auth_backends(self):
         """If backends are passed, they're included in the vhost config."""
         hookenv = FakeHookEnv()
         auth_backends = [('1.2.3.4', '8080'), ('5.6.7.8', '9090')]
+        resource_name = 'fips'
+        auth_cache_enabled = False
+        auth_cache_duration = auth_cache_inactivity = ""
         config = get_virtualhost_config(
-            auth_backends, False, "", "", hookenv=hookenv)
+            auth_backends, resource_name, auth_cache_enabled,
+            auth_cache_duration, auth_cache_inactivity, hookenv=hookenv)
         self.assertEqual(
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
@@ -63,13 +74,20 @@ class GetVirtualhostConfigTest(CharmTest):
              'auth_cache_enabled': False,
              'auth_cache_duration': "",
              'auth_cache_inactivity': "",
-             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
+             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth',
+             'resource_name': 'fips'},
             config)
 
     def test_virtualhost_config_auth_cache_time(self):
         """If caching time is passed, it's included in the vhost config."""
         hookenv = FakeHookEnv()
-        config = get_virtualhost_config([], True, "1h", "5m", hookenv=hookenv)
+        auth_backends = []
+        resource_name = 'esm-apps'
+        auth_cache_enabled = True
+        auth_cache_duration, auth_cache_inactivity = "1h", "5m"
+        config = get_virtualhost_config(
+            auth_backends, resource_name, auth_cache_enabled,
+            auth_cache_duration, auth_cache_inactivity, hookenv=hookenv)
         self.assertEqual(
             {'domain': '1.2.3.4',
              'document_root': '/srv/archive-auth-mirror/static',
@@ -77,7 +95,8 @@ class GetVirtualhostConfigTest(CharmTest):
              'auth_cache_enabled': True,
              'auth_cache_duration': "1h",
              'auth_cache_inactivity': "5m",
-             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth'},
+             'basic_auth_file': '/srv/archive-auth-mirror/basic-auth',
+             'resource_name': 'esm-apps'},
             config)
 
 

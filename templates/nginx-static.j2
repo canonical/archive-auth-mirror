@@ -49,6 +49,7 @@ server {
       {%- endif %}
         proxy_pass http://auth_backend/auth-check/;
         proxy_set_header Original-URI $request_uri;
+        proxy_set_header Resource-Name {{ resource_name }};
     }
   {%- endif %}
 }
