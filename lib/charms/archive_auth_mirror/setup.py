@@ -19,7 +19,7 @@ def get_virtualhost_name(hookenv=hookenv):
 
 
 def get_virtualhost_config(
-        auth_backends, auth_cache_enabled, auth_cache_duration,
+        auth_backends, resource_name, auth_cache_enabled, auth_cache_duration,
         auth_cache_inactivity, hookenv=hookenv):
     """Return the configuration for the static virtuahost."""
     paths = get_paths()
@@ -28,6 +28,7 @@ def get_virtualhost_config(
         'domain': domain,
         'document_root': str(paths['static']),
         'auth_backends': auth_backends or [],
+        'resource_name': resource_name,
         'auth_cache_enabled': auth_cache_enabled,
         'auth_cache_duration': auth_cache_duration,
         'auth_cache_inactivity': auth_cache_inactivity,

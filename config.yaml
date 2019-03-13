@@ -3,6 +3,10 @@ options:
     type: string
     description: "The URL of the service."
     default: ""
+  resource-name:
+    type: string
+    description: "The name of the resource associated with this service"
+    default: esm
   repository-origin:
     type: string
     description: "The value of the 'Origin' field of the repository."

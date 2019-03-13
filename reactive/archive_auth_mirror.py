@@ -28,6 +28,7 @@ NGINX_OPTIONS = (
     'auth-cache-duration',
     'auth-cache-enabled',
     'auth-cache-inactivity',
+    'resource-name',
 )
 
 
@@ -176,8 +177,8 @@ def _configure_static_serve(auth_backends=None):
     """Configure the static file serve."""
     cfg = hookenv.config()
     vhost_config = setup.get_virtualhost_config(
-        auth_backends, cfg['auth-cache-enabled'], cfg['auth-cache-duration'],
-        cfg['auth-cache-inactivity'])
+        auth_backends, cfg['resource-name'], cfg['auth-cache-enabled'],
+        cfg['auth-cache-duration'], cfg['auth-cache-inactivity'])
     configure_site('archive-auth-mirror', 'nginx-static.j2', **vhost_config)
 
 
