@@ -74,10 +74,8 @@ def configure_static_service_no_basic_auth_check():
 
 @when(charm_flag('installed'))
 @when('nginx.available', 'website.available')
-@when_not(charm_flag('website.configured'))
 def configure_website(website):
     website.configure(port=hookenv.config()['port'])
-    set_flag(charm_flag('website.configured'))
 
 
 @when_not('ssh-peers.local-public-key')
