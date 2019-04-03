@@ -65,11 +65,16 @@ class UpdateConfigTest(CharmTest):
         """update_config updates the config file if it exists."""
         update_config(
             config_path=self.config_path, suites=['xenial', 'bionic'])
-        update_config(config_path=self.config_path, sign_key_id='AABBCC')
+        update_config(
+            config_path=self.config_path,
+            sign_key_id='AABBCC',
+            packages_require_auth=True,
+        )
         config = get_config(config_path=self.config_path)
         self.assertEqual(config, {
-            'suites': ['xenial', 'bionic'],
+            'packages-require-auth': True,
             'sign-key-id': 'AABBCC',
+            'suites': ['xenial', 'bionic'],
         })
 
     def test_update_ssh_peers(self):

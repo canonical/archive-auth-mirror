@@ -21,13 +21,13 @@ def parse_args(args=None):
     return parser.parse_args(args=args)
 
 
-def patch_release_file(path):
+def patch_release_file(path, packages_require_auth):
     """Insert some custom fields in the Release file."""
     patch_path = path.with_suffix(".patched")
     with path.open() as file:
         with patch_path.open("x") as outfile:
             for line in file:
-                if line.startswith("MD5Sum:"):
+                if packages_require_auth and line.startswith("MD5Sum:"):
                     outfile.write("Packages-Require-Authorization: yes\n")
                 outfile.write(line)
     patch_path.rename(path)
@@ -43,7 +43,8 @@ def main():
 
     args = parse_args()
     unsigned_file = Path(args.unsigned_file)
-    patch_release_file(unsigned_file)
+    patch_release_file(
+        unsigned_file, config.get('packages-require-auth', False))
     if args.inline_sign_file:
         inline_sign(sign_key, unsigned_file, Path(args.inline_sign_file))
     if args.detach_sign_file:

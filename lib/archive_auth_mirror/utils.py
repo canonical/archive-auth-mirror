@@ -53,8 +53,9 @@ def get_config(config_path=None):
         return yaml.load(fh)
 
 
-def update_config(config_path=None, suites=(), sign_key_id=None,
-                  new_ssh_peers=None):
+def update_config(
+        config_path=None, suites=(), sign_key_id=None, new_ssh_peers=None,
+        packages_require_auth=None):
     """Update the config with the given parameters."""
     config = get_config(config_path=config_path)
     if suites:
@@ -65,5 +66,7 @@ def update_config(config_path=None, suites=(), sign_key_id=None,
         ssh_peers = config.get('ssh-peers', {})
         ssh_peers.update(new_ssh_peers)
         config['ssh-peers'] = ssh_peers
+    if packages_require_auth is not None:
+        config['packages-require-auth'] = packages_require_auth
     with config_path.open('w') as config_file:
         yaml.dump(config, config_file)

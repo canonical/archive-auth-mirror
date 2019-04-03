@@ -148,6 +148,10 @@ def config_set():
     # Export the public key used to sign the repository.
     _export_sign_key(sign_key_fingerprint)
     hookenv.status_set('active', 'Mirroring configured')
+    # Update scripts config.
+    utils.update_config(
+        config_path=utils.get_paths()['config'],
+        packages_require_auth=config['packages-require-auth'])
 
 
 @when_not('config.set.mirrors', 'config.set.sign-gpg-key')
