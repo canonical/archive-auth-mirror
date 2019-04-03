@@ -81,21 +81,33 @@ class ConfigureRepreproTest(CharmTest):
             self.assertEqual(f.read(), 'secret')
 
 
-class MiscRepositoryTests(CharmTest):
+class PatchReleaseFileTest(CharmTest):
 
-    def test_insert_packages_require_authorization(self):
+    def setUp(self):
+        super().setUp()
         with tempfile.NamedTemporaryFile('w', delete=False) as f:
             f.write('Origin: anOrigin\nMD5Sum:\n')
-        release_path = Path(f.name)
-        self.addCleanup(release_path.unlink)
-        patch_release_file(release_path)
-        with release_path.open() as result_file:
-            result = result_file.readlines()
+        self.release_path = Path(f.name)
+        self.addCleanup(self.release_path.unlink)
 
+    def test_with_authorization(self):
+        packages_require_auth = True
+        patch_release_file(self.release_path, packages_require_auth)
+        with self.release_path.open() as result_file:
+            result = result_file.readlines()
         self.assertEqual("Origin: anOrigin\n", result[0])
         self.assertEqual("Packages-Require-Authorization: yes\n", result[1])
         self.assertEqual("MD5Sum:\n", result[2])
         self.assertEqual(3, len(result))
+
+    def test_without_authorization(self):
+        packages_require_auth = False
+        patch_release_file(self.release_path, packages_require_auth)
+        with self.release_path.open() as result_file:
+            result = result_file.readlines()
+        self.assertEqual("Origin: anOrigin\n", result[0])
+        self.assertEqual("MD5Sum:\n", result[1])
+        self.assertEqual(2, len(result))
 
 
 class DisableMirroringTest(CharmTest):

@@ -57,3 +57,12 @@ options:
     type: string
     description: Cache inactivity before invalidation, like "15m" or "1h".
     default: 10m
+  packages-require-auth:
+    type: boolean
+    description: |
+      Whether the Packages-Require-Authorization field must be included in the
+      Release file. This field provides a hint that package downloads will
+      require authorization, hence allowing clients to prevent use of this
+      repository if authorization has not been provided, avoiding problems with
+      failing downloads.
+    default: false
