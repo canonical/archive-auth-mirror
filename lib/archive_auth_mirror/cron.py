@@ -1,4 +1,5 @@
 """Cron job configuration."""
+# flake8: noqa
 
 import textwrap
 
@@ -8,7 +9,7 @@ from .utils import get_paths
 CRONTAB_TEMPLATE = textwrap.dedent(
     '''
     #  m h dom mon dow user  command
-    */15 *   *   *   * root  {paths[bin]}/mirror-archive
+    */15 *   *   *   * root  {paths[bin]}/mirror-archive > /var/log/mirror-archive.log 2>&1
     ''')
 
 
