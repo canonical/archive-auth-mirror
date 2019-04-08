@@ -34,7 +34,7 @@ class ConfigureRepreproTest(CharmTest):
         self.assertEqual(
             textwrap.dedent(
                 '''\
-                Codename: xenial
+                Codename: xenial-updates
                 Suite: xenial
                 Version: 18.10
                 Label: Ubuntu
@@ -42,30 +42,30 @@ class ConfigureRepreproTest(CharmTest):
                 Components: main universe
                 Architectures: source i386 amd64
                 SignWith: ! {bin}/reprepro-sign-helper
-                Update: update-repo-xenial
+                Update: update-repo-xenial-updates
 
-                Codename: sid
+                Codename: sid-security
                 Suite: sid
                 Label: Debian
                 Origin: Debian
                 Components: multiverse
                 Architectures: source
                 SignWith: ! {bin}/reprepro-sign-helper
-                Update: update-repo-sid
+                Update: update-repo-sid-security
 
                 '''.format(**paths)),
             (paths['reprepro-conf'] / 'distributions').read_text())
         self.assertEqual(
             textwrap.dedent(
                 '''\
-                Name: update-repo-xenial
+                Name: update-repo-xenial-updates
                 Method: https://user:pass@example.com/ubuntu
                 Suite: xenial
                 Components: main universe
                 Architectures: source i386 amd64
                 VerifyRelease: finger
 
-                Name: update-repo-sid
+                Name: update-repo-sid-security
                 Method: https://user:pass@1.2.3.4/debian
                 Suite: sid
                 Components: multiverse
@@ -75,39 +75,79 @@ class ConfigureRepreproTest(CharmTest):
                 '''),
             (paths['reprepro-conf'] / 'updates').read_text())
         self.assertEqual(
-            yaml.load(paths['config'].read_text()),
-            {'sign-key-id': 'finger', 'suites': ['xenial', 'sid']})
+            yaml.load(paths['config'].read_text()), {
+                'sign-key-id': 'finger',
+                'pockets': ['xenial-updates', 'sid-security'],
+            })
         with paths['sign-passphrase'].open() as f:
             self.assertEqual(f.read(), 'secret')
 
 
 class PatchReleaseFileTest(CharmTest):
 
-    def setUp(self):
-        super().setUp()
+    def make_release_file(self, codename):
+        """Create a release file for testing. Return its path."""
         with tempfile.NamedTemporaryFile('w', delete=False) as f:
-            f.write('Origin: anOrigin\nMD5Sum:\n')
-        self.release_path = Path(f.name)
-        self.addCleanup(self.release_path.unlink)
+            f.write('Codename: {}\n'.format(codename))
+            f.write('Origin: anOrigin\n')
+            f.write('MD5Sum: aSum\n')
+        path = Path(f.name)
+        self.addCleanup(path.unlink)
+        return path
 
     def test_with_authorization(self):
+        release_path = self.make_release_file('xenial')
         packages_require_auth = True
-        patch_release_file(self.release_path, packages_require_auth)
-        with self.release_path.open() as result_file:
-            result = result_file.readlines()
-        self.assertEqual("Origin: anOrigin\n", result[0])
-        self.assertEqual("Packages-Require-Authorization: yes\n", result[1])
-        self.assertEqual("MD5Sum:\n", result[2])
-        self.assertEqual(3, len(result))
+        patch_release_file(release_path, packages_require_auth)
+        with release_path.open() as f:
+            content = f.read()
+        self.assertEqual(
+            content,
+            'Codename: xenial\n'
+            'Origin: anOrigin\n'
+            'Packages-Require-Authorization: yes\n'
+            'MD5Sum: aSum\n'
+        )
 
     def test_without_authorization(self):
+        release_path = self.make_release_file('trusty')
         packages_require_auth = False
-        patch_release_file(self.release_path, packages_require_auth)
-        with self.release_path.open() as result_file:
-            result = result_file.readlines()
-        self.assertEqual("Origin: anOrigin\n", result[0])
-        self.assertEqual("MD5Sum:\n", result[1])
-        self.assertEqual(2, len(result))
+        patch_release_file(release_path, packages_require_auth)
+        with release_path.open() as f:
+            content = f.read()
+        self.assertEqual(
+            content,
+            'Codename: trusty\n'
+            'Origin: anOrigin\n'
+            'MD5Sum: aSum\n'
+        )
+
+    def test_with_two_words_pocket(self):
+        release_path = self.make_release_file('xenial-updates')
+        packages_require_auth = True
+        patch_release_file(release_path, packages_require_auth)
+        with release_path.open() as f:
+            content = f.read()
+        self.assertEqual(
+            content,
+            'Codename: xenial\n'
+            'Origin: anOrigin\n'
+            'Packages-Require-Authorization: yes\n'
+            'MD5Sum: aSum\n'
+        )
+
+    def test_with_three_words_pocket(self):
+        release_path = self.make_release_file('bionic-foo-bar')
+        packages_require_auth = False
+        patch_release_file(release_path, packages_require_auth)
+        with release_path.open() as f:
+            content = f.read()
+        self.assertEqual(
+            content,
+            'Codename: bionic\n'
+            'Origin: anOrigin\n'
+            'MD5Sum: aSum\n'
+        )
 
 
 class DisableMirroringTest(CharmTest):
@@ -153,6 +193,7 @@ mirrors = (
         archs='source i386 amd64',
         version='18.10',
         origin='Ubuntu',
+        pocket='xenial-updates',
     ),
     Mirror(
         url='https://user:pass@1.2.3.4/debian',
@@ -162,6 +203,7 @@ mirrors = (
         archs='source',
         version='',
         origin='Debian',
+        pocket='sid-security',
     ),
 )
 sign_key_fingerprint, sign_key_passphrase = 'finger', 'secret'

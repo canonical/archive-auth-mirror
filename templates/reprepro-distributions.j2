@@ -1,4 +1,4 @@
-{% for mirror in mirrors %}Codename: {{ mirror.suite }}
+{% for mirror in mirrors %}Codename: {{ mirror.pocket }}
 Suite: {{ mirror.suite }}
 {%- if mirror.version %}
 Version: {{ mirror.version }}
@@ -8,6 +8,6 @@ Origin: {{ mirror.origin }}
 Components: {{ mirror.components }}
 Architectures: {{ mirror.archs }}
 SignWith: ! {{ sign_script }}
-Update: update-repo-{{ mirror.suite }}
+Update: update-repo-{{ mirror.pocket }}
 
 {% endfor %}

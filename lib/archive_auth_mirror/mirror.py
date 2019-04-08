@@ -45,9 +45,11 @@ def from_config(keyring, mirrors, origin):
             archs=entry.get('archs', 'source i386 amd64'),
             version=entry.get('version', ''),
             origin=origin,
+            pocket=entry.get('pocket') or suite,
         ))
     return tuple(results)
 
 
 # Mirror represents a debian mirror.
-Mirror = namedtuple('Mirror', 'url suite components key archs version origin')
+Mirror = namedtuple(
+    'Mirror', 'url suite components key archs version origin pocket')
