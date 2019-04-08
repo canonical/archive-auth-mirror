@@ -32,7 +32,7 @@ def configure_reprepro(mirrors, sign_key_fingerprint, sign_key_passphrase):
     # Update configuration.
     update_config(
         config_path=paths['config'],
-        suites=[mirror.suite for mirror in mirrors],
+        pockets=[mirror.pocket for mirror in mirrors],
         sign_key_id=sign_key_fingerprint)
     # Save the sign passphrase for the signing helper script.
     with paths['sign-passphrase'].open('w') as fh:

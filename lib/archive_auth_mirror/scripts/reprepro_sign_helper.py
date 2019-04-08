@@ -27,7 +27,9 @@ def patch_release_file(path, packages_require_auth):
     with path.open() as file:
         with patch_path.open("x") as outfile:
             for line in file:
-                if packages_require_auth and line.startswith("MD5Sum:"):
+                if line.startswith('Codename:'):
+                    line = line.rstrip().split('-')[0] + '\n'
+                elif packages_require_auth and line.startswith("MD5Sum:"):
                     outfile.write("Packages-Require-Authorization: yes\n")
                 outfile.write(line)
     patch_path.rename(path)

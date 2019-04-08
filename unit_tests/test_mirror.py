@@ -68,6 +68,7 @@ class TestFromConfig(unittest.TestCase):
             'deb-line': 'https://user:pass@1.2.3.4/ubuntu bionic main misc',
             'pub-key': 'pub1',
             'version': '18.10',
+            'pocket': 'bionic-updates',
         }, {
             'deb-line': 'https://user:pass@4.3.2.1/ubuntu xenial main',
             'pub-key': 'pub2',
@@ -82,6 +83,7 @@ class TestFromConfig(unittest.TestCase):
                 archs='source i386 amd64',
                 version='18.10',
                 origin='Ubuntu',
+                pocket='bionic-updates',
             ),
             Mirror(
                 url='https://user:pass@4.3.2.1/ubuntu',
@@ -91,6 +93,7 @@ class TestFromConfig(unittest.TestCase):
                 archs='i386',
                 version='',
                 origin='Ubuntu',
+                pocket='xenial',
             ),
         ),
     }, {
@@ -111,6 +114,7 @@ class TestFromConfig(unittest.TestCase):
                 archs='source i386 amd64',
                 version='18.10',
                 origin='Gallifrey',
+                pocket='bionic',
             ),
         ),
     }]

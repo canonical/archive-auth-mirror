@@ -23,11 +23,19 @@ options:
           pub-key: GPG public key for validating the repository
           archs: source i386 amd64
           version: 18.10
+          pocket: xenial-updates
         - deb-line: ...
           pub-key: ...
 
       The archs field defaults to "source i386 amd64".
       The version field, if not specified, is omitted.
+      The pocket is the dists subdirectory where the Release file can be found
+      locally. The pocket must uniquely identify a mirror. If not specified, it
+      defaults to the value of the suite from the deb-line. In any case, the
+      codename in the Release file is generated from the pocket prefix, so
+      that, for instance, "trusty", "trusty-updates" and "trusty-foo-bar" will
+      all have "trusty" as their codename.
+
       The charm is blocked until this config value is provided.
     default: ""
   sign-gpg-key:

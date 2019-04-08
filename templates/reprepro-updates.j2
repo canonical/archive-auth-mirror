@@ -1,4 +1,4 @@
-{% for mirror in mirrors %}Name: update-repo-{{ mirror.suite }}
+{% for mirror in mirrors %}Name: update-repo-{{ mirror.pocket }}
 Method: {{ mirror.url }}
 Suite: {{ mirror.suite }}
 Components: {{ mirror.components }}

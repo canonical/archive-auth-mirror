@@ -56,15 +56,15 @@ class UpdateConfigTest(CharmTest):
 
     def test_no_config(self):
         """update_config creates the config file if not present."""
-        update_config(config_path=self.config_path, suites=['bionic'])
+        update_config(config_path=self.config_path, pockets=['bionic'])
         self.assertTrue(self.config_path.exists())
         config = get_config(config_path=self.config_path)
-        self.assertEqual(config, {'suites': ['bionic']})
+        self.assertEqual(config, {'pockets': ['bionic']})
 
     def test_update_existing(self):
         """update_config updates the config file if it exists."""
         update_config(
-            config_path=self.config_path, suites=['xenial', 'bionic'])
+            config_path=self.config_path, pockets=['xenial', 'bionic'])
         update_config(
             config_path=self.config_path,
             sign_key_id='AABBCC',
@@ -74,7 +74,7 @@ class UpdateConfigTest(CharmTest):
         self.assertEqual(config, {
             'packages-require-auth': True,
             'sign-key-id': 'AABBCC',
-            'suites': ['xenial', 'bionic'],
+            'pockets': ['xenial', 'bionic'],
         })
 
     def test_update_ssh_peers(self):
