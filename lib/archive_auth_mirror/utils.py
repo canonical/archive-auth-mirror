@@ -54,12 +54,12 @@ def get_config(config_path=None):
 
 
 def update_config(
-        config_path=None, pockets=(), sign_key_id=None, new_ssh_peers=None,
+        config_path=None, suites=(), sign_key_id=None, new_ssh_peers=None,
         packages_require_auth=None):
     """Update the config with the given parameters."""
     config = get_config(config_path=config_path)
-    if pockets:
-        config['pockets'] = pockets
+    if suites:
+        config['suites'] = suites
     if sign_key_id is not None:
         config['sign-key-id'] = sign_key_id
     if new_ssh_peers is not None:

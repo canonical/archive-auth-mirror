@@ -15,7 +15,7 @@ def main():
     logger = setup_logger(echo=True)
     paths = get_paths()
     config = get_config()
-    pockets = config['pockets']
+    suites = config['suites']
     other_units = config.get('ssh-peers', {}).keys()
     # Using StrictHostKeyChecking=no isn't ideal, but we don't yet
     # popolate known_hosts with the right keys. But we trust the
@@ -37,13 +37,13 @@ def main():
         logger.info('fetching new pool packages')
         reprepro.execute(
             '--show-percent', '--export=never', '--keepunreferencedfiles',
-            'update', *pockets)
+            'update', *suites)
 
         logger.info('rsyncing new pool packages to peer units')
         remote_sync(paths['static'] / 'ubuntu', logger)
 
         logger.info('generating new dists directory')
-        reprepro.execute('export', *pockets)
+        reprepro.execute('export', *suites)
 
         logger.info('rsyncing new dists directory to peer units')
         remote_sync(paths['static'] / 'ubuntu' / 'dists', logger)

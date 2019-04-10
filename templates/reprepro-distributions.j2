@@ -1,5 +1,5 @@
-{% for mirror in mirrors %}Codename: {{ mirror.pocket }}
-Suite: {{ mirror.suite }}
+{% for mirror in mirrors %}Codename: {{ mirror.local_suite }}
+Suite: {{ mirror.local_suite }}
 {%- if mirror.version %}
 Version: {{ mirror.version }}
 {%- endif %}
@@ -8,6 +8,6 @@ Origin: {{ mirror.origin }}
 Components: {{ mirror.components }}
 Architectures: {{ mirror.archs }}
 SignWith: ! {{ sign_script }}
-Update: update-repo-{{ mirror.pocket }}
+Update: update-repo-{{ mirror.local_suite }}
 
 {% endfor %}

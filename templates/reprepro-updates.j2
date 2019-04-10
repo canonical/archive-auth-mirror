@@ -1,6 +1,6 @@
-{% for mirror in mirrors %}Name: update-repo-{{ mirror.pocket }}
+{% for mirror in mirrors %}Name: update-repo-{{ mirror.local_suite }}
 Method: {{ mirror.url }}
-Suite: {{ mirror.suite }}
+Suite: {{ mirror.remote_suite }}
 Components: {{ mirror.components }}
 Architectures: {{ mirror.archs }}
 VerifyRelease: {{ mirror.key }}
