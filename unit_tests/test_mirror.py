@@ -68,7 +68,7 @@ class TestFromConfig(unittest.TestCase):
             'deb-line': 'https://user:pass@1.2.3.4/ubuntu bionic main misc',
             'pub-key': 'pub1',
             'version': '18.10',
-            'pocket': 'bionic-updates',
+            'suite': 'bionic-updates',
         }, {
             'deb-line': 'https://user:pass@4.3.2.1/ubuntu xenial main',
             'pub-key': 'pub2',
@@ -77,23 +77,23 @@ class TestFromConfig(unittest.TestCase):
         'want_results': (
             Mirror(
                 url='https://user:pass@1.2.3.4/ubuntu',
-                suite='bionic',
+                remote_suite='bionic',
                 components='main misc',
                 key='pub1-fingerprint',
                 archs='source i386 amd64',
                 version='18.10',
                 origin='Ubuntu',
-                pocket='bionic-updates',
+                local_suite='bionic-updates',
             ),
             Mirror(
                 url='https://user:pass@4.3.2.1/ubuntu',
-                suite='xenial',
+                remote_suite='xenial',
                 components='main',
                 key='pub2-fingerprint',
                 archs='i386',
                 version='',
                 origin='Ubuntu',
-                pocket='xenial',
+                local_suite='xenial',
             ),
         ),
     }, {
@@ -108,13 +108,13 @@ class TestFromConfig(unittest.TestCase):
         'want_results': (
             Mirror(
                 url='https://user:pass@1.2.3.4/ubuntu',
-                suite='bionic',
+                remote_suite='bionic',
                 components='main misc',
                 key='pub1-fingerprint',
                 archs='source i386 amd64',
                 version='18.10',
                 origin='Gallifrey',
-                pocket='bionic',
+                local_suite='bionic',
             ),
         ),
     }]

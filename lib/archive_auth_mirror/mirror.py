@@ -29,7 +29,7 @@ def from_config(keyring, mirrors, origin):
         except KeyError as err:
             raise ValueError('mirrors value is missing keys: {}'.format(err))
         try:
-            url, suite, components = debline.split(' ', maxsplit=2)
+            url, remote_suite, components = debline.split(' ', maxsplit=2)
         except (TypeError, ValueError):
             raise ValueError('invalid debline {!r}'.format(debline))
         try:
@@ -39,17 +39,18 @@ def from_config(keyring, mirrors, origin):
                 'cannot import GPG public key {!r}: {}'.format(pubkey, err))
         results.append(Mirror(
             url=url,
-            suite=suite,
+            remote_suite=remote_suite,
             components=components,
             key=key,
             archs=entry.get('archs', 'source i386 amd64'),
             version=entry.get('version', ''),
             origin=origin,
-            pocket=entry.get('pocket') or suite,
+            local_suite=entry.get('suite') or remote_suite,
         ))
     return tuple(results)
 
 
 # Mirror represents a debian mirror.
 Mirror = namedtuple(
-    'Mirror', 'url suite components key archs version origin pocket')
+    'Mirror',
+    'url remote_suite components key archs version origin local_suite')

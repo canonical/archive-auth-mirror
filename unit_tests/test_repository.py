@@ -35,7 +35,7 @@ class ConfigureRepreproTest(CharmTest):
             textwrap.dedent(
                 '''\
                 Codename: xenial-updates
-                Suite: xenial
+                Suite: xenial-updates
                 Version: 18.10
                 Label: Ubuntu
                 Origin: Ubuntu
@@ -45,7 +45,7 @@ class ConfigureRepreproTest(CharmTest):
                 Update: update-repo-xenial-updates
 
                 Codename: sid-security
-                Suite: sid
+                Suite: sid-security
                 Label: Debian
                 Origin: Debian
                 Components: multiverse
@@ -77,7 +77,7 @@ class ConfigureRepreproTest(CharmTest):
         self.assertEqual(
             yaml.load(paths['config'].read_text()), {
                 'sign-key-id': 'finger',
-                'pockets': ['xenial-updates', 'sid-security'],
+                'suites': ['xenial-updates', 'sid-security'],
             })
         with paths['sign-passphrase'].open() as f:
             self.assertEqual(f.read(), 'secret')
@@ -122,7 +122,7 @@ class PatchReleaseFileTest(CharmTest):
             'MD5Sum: aSum\n'
         )
 
-    def test_with_two_words_pocket(self):
+    def test_with_two_words_suite(self):
         release_path = self.make_release_file('xenial-updates')
         packages_require_auth = True
         patch_release_file(release_path, packages_require_auth)
@@ -136,7 +136,7 @@ class PatchReleaseFileTest(CharmTest):
             'MD5Sum: aSum\n'
         )
 
-    def test_with_three_words_pocket(self):
+    def test_with_three_words_suite(self):
         release_path = self.make_release_file('bionic-foo-bar')
         packages_require_auth = False
         patch_release_file(release_path, packages_require_auth)
@@ -187,23 +187,23 @@ class DisableMirroringTest(CharmTest):
 mirrors = (
     Mirror(
         url='https://user:pass@example.com/ubuntu',
-        suite='xenial',
+        remote_suite='xenial',
         components='main universe',
         key='finger',
         archs='source i386 amd64',
         version='18.10',
         origin='Ubuntu',
-        pocket='xenial-updates',
+        local_suite='xenial-updates',
     ),
     Mirror(
         url='https://user:pass@1.2.3.4/debian',
-        suite='sid',
+        remote_suite='sid',
         components='multiverse',
         key='finger',
         archs='source',
         version='',
         origin='Debian',
-        pocket='sid-security',
+        local_suite='sid-security',
     ),
 )
 sign_key_fingerprint, sign_key_passphrase = 'finger', 'secret'
